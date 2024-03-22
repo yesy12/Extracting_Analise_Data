@@ -97,8 +97,8 @@ class Review():
             try:
                 self.conection.insert(sql)
                 print(f"Cadastrado: {self.title}")
-            except pyodbc.Error as Eror:
-                print(Eror)
+            except pyodbc.Error as Error:
+                print(Error)
                 
                 
         # # plataforma = self.conection.select("select top 1 id from dbo.plataforma where nome='Steam';")
@@ -116,8 +116,8 @@ class Review():
             try:
                 self.conection.insert(sql)
                 print("Usuario cadastrado")
-            except pyodbc.Error as Eror:
-                print(Eror) 
+            except pyodbc.Error as Error:
+                print(Error) 
 
     def saveGameInformation(self) -> None:
         sql = f"select TOP 1 id from pessoaSteam where link = '{self.playerInfo.getLinkPlayerSteam()}';"    
@@ -139,6 +139,10 @@ class Review():
                 {self.likes.getLikesEmoticon()}, {self.playerInfo.getQuantifyCommentAboutFromReview()},{self.playerInfo.getQuantifyGameFromPlayerReview()},
                 {result}, 2, {self.AppIDGame})
         """
-        self.conection.insert(sql)
-        # print(f'{self.player.getReviewAboutTheGame()}')
+        try:
+            self.conection.insert(sql)
+            print("Cadastrado")
+        except pyodbc.Error as Error:
+            print(Error)
+        
         
