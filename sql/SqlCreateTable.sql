@@ -30,6 +30,7 @@ if not exists (select * from information_schema.tables  where table_name = 'game
 			id int not null,
 			plataforma int,
 			titulo  varchar(50) not null,
+			link varchar(100) unique not null,
 			dataCadastro date not null,
 			dataAlterado date
 			primary key(id)
@@ -40,7 +41,7 @@ if not exists (select * from information_schema.tables  where table_name = 'plat
 	begin
 		create table plataforma(
 			id int not null identity(1,1),
-			nome varchar(50),
+			nome varchar(50) unique,
 			dataCadastro date not null,
 			dataAlterado date
 			primary key(id)

@@ -13,3 +13,7 @@ ALTER TABLE reviewCompleta
 ALTER TABLE reviewCompleta
 	add constraint fkGameCadastrado foreign key(gameCadastrado)
 	references gameCadastrado(id);
+
+ALTER TABLE gameCadastrado
+	add constraint fkPlataformaCadastrada foreign key(plataforma)
+	references plataforma(id);

@@ -7,21 +7,31 @@ from package.multiClass.Likes import Likes
 from package.multiClass.Vote import Vote
 from package.multiClass.PlayerInfos import PlayerInfo
 
+from sql.credential import credential
+
 class Review():
 
     def __init__(self, ) -> None:
         self.driver = webdriver.Edge()
+        self.conection = credential()
 
     def getLink(self, link) -> None:
         self.driver.get(link)
+
+    def gameActual(self):
+        div = self.driver.find_element(By.CLASS_NAME, "apphub_OtherSiteInfo")                   
+        appID = div.find_element(By.CLASS_NAME, "btnv6_blue_hoverfade")
+        self.AppIDGame = appID.get_attribute("data-appid") 
+        self.linkGameSteam = appID.get_attribute("href")
+
+        self.title = div = self.driver.find_element(By.CLASS_NAME, "apphub_AppName").text
+  
 
     def setPageRow(self, pageIndex) -> None:
         pageRow = self.driver.find_element(By.ID, f"page{pageIndex}")
 
         self.divCardRows = pageRow.find_elements(By.XPATH,"//div[@class='apphub_CardRow' ]")
-
-
-    
+   
     def getGeral(self) -> None:
         i = 0
         for divCardRow in self.divCardRows:                
@@ -38,10 +48,8 @@ class Review():
                 self.getDescriptionForRewiew(appReviews)
 
                 self.getPlayerInfo(divCardRowReviewUniquePlayer)
-                self.getInfo()
-                
+                self.getInfo()     
         
-
     def getDescriptionForLikes(self, appReviewsDriver) -> None:
         found = appReviewsDriver.find_element(By.CLASS_NAME, "found_helpful").text
         self.likes = Likes(found)        
@@ -77,3 +85,21 @@ class Review():
         print(f"\tQuantidade de Games: {self.playerInfo.getQuantifyGameFromPlayerReview()}")
         print(f"\tQuantidade de Comentarios: {self.playerInfo.getQuantifyCommentAboutFromReview()}\n")
         print("-"*100+"\n\n")
+
+    def saveGameTitle(self) -> None:
+        sql = f"select TOP 1 * from gameCadastrado where id = {self.AppIDGame};"
+        results = self.conection.select(sql)
+        
+        if (len(results) > 0) == False:
+            sql = f""" insert into gameCadastrado (id, plataforma, titulo, link, dataCadastro, dataAlterado)
+                values ({self.AppIDGame}, 1, '{self.title}', '{self.linkGameSteam}', GETDATE(),GETDATE());
+            """
+            try:
+                gameCadastrado = self.conection.insert(sql)
+                print(f"Cadastrado: {self.title}")
+            except pyodbc.Error as Eror:
+                print(Eror)
+                
+                
+        # # plataforma = self.conection.select("select top 1 id from dbo.plataforma where nome='Steam';")
+        
