@@ -14,6 +14,7 @@ class Review():
     def __init__(self, ) -> None:
         self.driver = webdriver.Edge()
         self.conection = credential()
+        self.index = 0
 
     def getLink(self, link) -> None:
         self.driver.get(link)
@@ -28,17 +29,16 @@ class Review():
 
     def setPageRow(self, pageIndex) -> None:
         pageRow = self.driver.find_element(By.ID, f"page{pageIndex}")
+        print(f"Página: {pageIndex}")
 
         self.divCardRows = pageRow.find_elements(By.XPATH,"//div[@class='apphub_CardRow' ]")
    
     def getGeral(self) -> None:
-        i = 0
         for divCardRow in self.divCardRows:                
             divCardRowRewiewUniquePlayers = divCardRow.find_elements(By.CLASS_NAME, "apphub_Card")
         
-
             for divCardRowReviewUniquePlayer in divCardRowRewiewUniquePlayers:
-                i+= 1
+                self.index+= 1
                 geral = divCardRowReviewUniquePlayer.find_element(By.CLASS_NAME, "apphub_CardContentMain")
                 appReviews = geral.find_element(By.CLASS_NAME,"apphub_UserReviewCardContent") 
                             
@@ -48,8 +48,7 @@ class Review():
 
                 self.getPlayerInfo(divCardRowReviewUniquePlayer)
                 self.saveSteamPeople()
-                self.saveGameInformation()
-                # self.getInfo()     
+                self.saveGameInformation() 
         
     def getDescriptionForLikes(self, appReviewsDriver) -> None:
         found = appReviewsDriver.find_element(By.CLASS_NAME, "found_helpful").text
@@ -66,25 +65,6 @@ class Review():
     def getPlayerInfo(self, divCardRowRewiewUniquePlayerDriver) -> None:
         appPlayersInfo = divCardRowRewiewUniquePlayerDriver.find_element(By.CLASS_NAME,"apphub_CardContentAuthorBlock")
         self.playerInfo = PlayerInfo(appPlayersInfo)
-
-    def getInfo(self) -> None:
-        print("-"*100)
-        # print("Likes")    
-        # print(f"\tEmoticon: {self.likes.getLikesEmoticon()}, Util: {self.likes.getLikesUtil()}, Engraçada: {self.likes.getLikesFunny()}\n")
-
-        # print("Votes")
-        # print(f"\tRecomend: {self.vote.getRecomend()}, Horas jogadas: {self.vote.getHoursPlayers()}\n")
-
-        # print("Review")
-        # print(f"\tPublicado em: {self.player.getPublishDay()}")
-        # print(f"\tReview: {self.player.getReviewAboutTheGame()}\n")        
-
-        print("Informações do player")
-        print(f"\tLink da steam: [{self.playerInfo.getLinkPlayerSteam()}]")
-        print(f"\tNickname: {self.playerInfo.getRandomNickname()}")
-        print(f"\tQuantidade de Games: {self.playerInfo.getQuantifyGameFromPlayerReview()}")
-        print(f"\tQuantidade de Comentarios: {self.playerInfo.getQuantifyCommentAboutFromReview()}\n")
-        print("-"*100+"\n\n")
 
     def saveGameTitle(self) -> None:
         sql = f"select TOP 1 * from gameCadastrado where id = {self.AppIDGame};"
@@ -132,16 +112,16 @@ class Review():
                 descricao, horasJogadas, dataPublicada, 
                 recomendado, pessoasAcharamUtil, pessoasAcharamEngracada, 
                 pessoasReagiramEmoticon, quantidadesComentarios, quantidadeJogosNaConta, 
-                idSteam, linguagemPublicacao, gameCadastrado)
+                idSteam, gameCadastrado)
 	        values (
                 '{self.player.getReviewAboutTheGame()}', {self.vote.getHoursPlayers()}, '{self.player.getPublishDay()}', 
                 {self.vote.getRecomend()}, {self.likes.getLikesUtil()}, {self.likes.getLikesFunny()}, 
                 {self.likes.getLikesEmoticon()}, {self.playerInfo.getQuantifyCommentAboutFromReview()},{self.playerInfo.getQuantifyGameFromPlayerReview()},
-                {result}, 2, {self.AppIDGame})
+                {result}, {self.AppIDGame})
         """
         try:
             self.conection.insert(sql)
-            print("Cadastrado")
+            print(f"\tCadastrado: {self.index}")
         except pyodbc.Error as Error:
             print(Error)
         
