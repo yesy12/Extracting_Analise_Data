@@ -25,7 +25,6 @@ class Review():
         self.linkGameSteam = appID.get_attribute("href")
 
         self.title = div = self.driver.find_element(By.CLASS_NAME, "apphub_AppName").text
-  
 
     def setPageRow(self, pageIndex) -> None:
         pageRow = self.driver.find_element(By.ID, f"page{pageIndex}")
@@ -48,7 +47,9 @@ class Review():
                 self.getDescriptionForRewiew(appReviews)
 
                 self.getPlayerInfo(divCardRowReviewUniquePlayer)
-                self.getInfo()     
+                self.saveSteamPeople()
+                self.saveGameInformation()
+                # self.getInfo()     
         
     def getDescriptionForLikes(self, appReviewsDriver) -> None:
         found = appReviewsDriver.find_element(By.CLASS_NAME, "found_helpful").text
@@ -68,16 +69,15 @@ class Review():
 
     def getInfo(self) -> None:
         print("-"*100)
-        print("Likes")
-        
-        print(f"\tEmoticon: {self.likes.getLikesEmoticon()}, Util: {self.likes.getLikesUtil()}, Engraçada: {self.likes.getLikesFunny()}\n")
+        # print("Likes")    
+        # print(f"\tEmoticon: {self.likes.getLikesEmoticon()}, Util: {self.likes.getLikesUtil()}, Engraçada: {self.likes.getLikesFunny()}\n")
 
-        print("Votes")
-        print(f"\tRecomend: {self.vote.getRecomend()}, Horas jogadas: {self.vote.getHoursPlayers()}\n")
+        # print("Votes")
+        # print(f"\tRecomend: {self.vote.getRecomend()}, Horas jogadas: {self.vote.getHoursPlayers()}\n")
 
-        print("Review")
-        print(f"\tPublicado em: {self.player.getPublishDay()}")
-        print(f"\tReview: {self.player.getReviewAboutTheGame()}\n")        
+        # print("Review")
+        # print(f"\tPublicado em: {self.player.getPublishDay()}")
+        # print(f"\tReview: {self.player.getReviewAboutTheGame()}\n")        
 
         print("Informações do player")
         print(f"\tLink da steam: [{self.playerInfo.getLinkPlayerSteam()}]")
@@ -95,11 +95,50 @@ class Review():
                 values ({self.AppIDGame}, 1, '{self.title}', '{self.linkGameSteam}', GETDATE(),GETDATE());
             """
             try:
-                gameCadastrado = self.conection.insert(sql)
+                self.conection.insert(sql)
                 print(f"Cadastrado: {self.title}")
             except pyodbc.Error as Eror:
                 print(Eror)
                 
                 
         # # plataforma = self.conection.select("select top 1 id from dbo.plataforma where nome='Steam';")
+    
+    def saveSteamPeople(self) -> None:
+        sql = f"select * from pessoaSteam where link = '{self.playerInfo.getLinkPlayerSteam()}';"        
+        results = self.conection.select(sql)
+        
+        if(len(results) > 0) == False:
+            sql = f"""
+            insert into pessoaSteam(
+                Nickname, link, relevancia) 
+            values ('{self.playerInfo.getRandomNickname()}', '{self.playerInfo.getLinkPlayerSteam()}', 0)
+            """
+            try:
+                self.conection.insert(sql)
+                print("Usuario cadastrado")
+            except pyodbc.Error as Eror:
+                print(Eror) 
+
+    def saveGameInformation(self) -> None:
+        sql = f"select TOP 1 id from pessoaSteam where link = '{self.playerInfo.getLinkPlayerSteam()}';"    
+        results = self.conection.select(sql)
+        result = 0
+
+        for row in results[0]:
+            result = row
+
+        sql = f"""
+            insert into reviewCompleta (
+                descricao, horasJogadas, dataPublicada, 
+                recomendado, pessoasAcharamUtil, pessoasAcharamEngracada, 
+                pessoasReagiramEmoticon, quantidadesComentarios, quantidadeJogosNaConta, 
+                idSteam, linguagemPublicacao, gameCadastrado)
+	        values (
+                '{self.player.getReviewAboutTheGame()}', {self.vote.getHoursPlayers()}, '{self.player.getPublishDay()}', 
+                {self.vote.getRecomend()}, {self.likes.getLikesUtil()}, {self.likes.getLikesFunny()}, 
+                {self.likes.getLikesEmoticon()}, {self.playerInfo.getQuantifyCommentAboutFromReview()},{self.playerInfo.getQuantifyGameFromPlayerReview()},
+                {result}, 2, {self.AppIDGame})
+        """
+        self.conection.insert(sql)
+        # print(f'{self.player.getReviewAboutTheGame()}')
         
