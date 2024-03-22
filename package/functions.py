@@ -18,7 +18,16 @@ def replaceHours(text) -> str:
 def replaceDateAndSplit(text):
     date = re.sub("Publicada: ","", text)
     date = re.sub(" ","", date)
+    dezembro = re.search("dezembro",date)
+
     date = re.split("de", date)
+
+    if dezembro:
+        date[0] = date[0]
+        date[1] = re.sub("zembro", "dezembro",date[2])
+        date[2] = date[3]
+        date.pop()
+
     date[0] = int(date[0])
     return date
 
