@@ -13,7 +13,7 @@ class Vote:
         if recomend == "Recomendado":
             return 1
         else:
-            return -1
+            return 0
     
         
     def getHoursPlayers(self) -> float:

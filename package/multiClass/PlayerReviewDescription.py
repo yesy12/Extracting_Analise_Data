@@ -8,7 +8,7 @@ class PlayerReviewDescription():
     def __init__(self, driverApp) -> None:
         self.driverApp = driverApp
 
-    def getPublishDay(self) -> int:
+    def getPublishDay(self) -> str:
         publish = self.driverApp.find_element(By.CLASS_NAME,"date_posted").text
 
         publish = replaceDateAndSplit(publish)
@@ -16,6 +16,7 @@ class PlayerReviewDescription():
         publish = addYearDatePublish(publish)
         publish[2] = int(publish[2])
         
+        publish = f"{publish[2]}-{publish[1]}-{publish[0]}"
         return publish
 
     def getReviewAboutTheGame(self) -> str:    
@@ -25,10 +26,15 @@ class PlayerReviewDescription():
 
         elements = tree.xpath('//div[not(@class="date_posted")]')
         elements_text_strip = []
-
+        
         for element in elements:
             e = re.sub("\t","",element.text_content().strip())
-            e = re.sub("Publicada: .+[0-9]","",e)            
+            e = re.sub("Publicada: [0-9].+\n","",e) 
+                      
             elements_text_strip.append(e)
   
-        return elements_text_strip
+        element = ""
+        for element_text in elements_text_strip:
+            element += element_text
+
+        return element

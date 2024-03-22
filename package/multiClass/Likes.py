@@ -17,8 +17,7 @@ class Likes:
         try:
             return int(self.foundSplit[ floor( len(self.foundSplit)/2 ) ] )
         except:
-            print("Não existe esse dado")
-            return -1
+            return 0
     
     def getLikesUtil(self) -> int:
         return int(self.foundSplit[0])
