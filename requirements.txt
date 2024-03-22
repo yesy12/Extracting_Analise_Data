@@ -1,4 +1,5 @@
-pip install pyodbc
-pip install selenium
-pip install lxml
-pip install names
+pyodbc
+selenium
+lxml
+names
+python-dotenv
