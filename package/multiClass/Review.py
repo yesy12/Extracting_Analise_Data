@@ -50,6 +50,14 @@ class Review():
                 self.saveSteamPeople()
                 self.saveGameInformation() 
         
+    def getScrollHeight(self) -> int:
+        return self.driver.execute_script("return document.body.scrollHeight")
+
+    def scroll(self):
+        self.driver.execute_script(f"window.scrollTo(0,{self.getScrollHeight()})")
+        sleep(2)
+        
+
     def getDescriptionForLikes(self, appReviewsDriver) -> None:
         found = appReviewsDriver.find_element(By.CLASS_NAME, "found_helpful").text
         self.likes = Likes(found)        
