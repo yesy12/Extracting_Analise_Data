@@ -59,23 +59,12 @@ if not exists (select * from information_schema.tables  where table_name = 'pess
 		);
 	end;
 
--- descricao self.player.getReviewAboutTheGame()
--- horasJogadas float not null, self.vote.getHoursPlayers()
--- dataPublicada date, self.player.getPublishDay()
--- recomendado int not null, self.vote.getRecomend()
-
--- pessoasAcharamUtil int, self.likes.getLikesUtil()
--- pessoasAcharamEngracada int,self.likes.getLikesFunny()
--- pessoasReagiramEmoticon int, self.likes.getLikesEmoticon()
-	 
--- quantidadesComentarios int, self.playerInfo.getQuantifyCommentAboutFromReview()
--- quantidadeJogosNaConta int null, self.playerInfo.getQuantifyGameFromPlayerReview()
 if not exists (select * from information_schema.tables  where table_name = 'reviewCompleta')
 	begin
 		create table reviewCompleta(
 			id int not null identity(1,1),
 			descricao text, 
-			horasJogadas float not null, 
+			horasJogadas decimal(10,2) not null, 
 			dataPublicada date, 
 			recomendado int not null,
 
@@ -86,10 +75,10 @@ if not exists (select * from information_schema.tables  where table_name = 'revi
 			quantidadesComentarios int, 
 			quantidadeJogosNaConta int null, 
 
-			idSteam int null, --ok
-			linguagemPublicacao int null, --ok
-			analiseFinal int null, --ok
-			gameCadastrado int null --ok
+			idSteam int null, 
+			linguagemPublicacao int null,
+			analiseFinal int null, 
+			gameCadastrado int null 
 			primary key(id)
 		);  
 	end;
