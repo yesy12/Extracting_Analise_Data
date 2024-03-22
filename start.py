@@ -11,8 +11,15 @@ newReview.getLink(link)
 newReview.gameActual()
 newReview.saveGameTitle()
 
+for i in range(1,1000):
+    sleep(1)
+    newReview.setPageRow(i)
+    newReview.getGeral()
 
-sleep(1)
+    lastHeight = newReview.getScrollHeight()
+    newReview.scroll()
+    newScrollHeight = newReview.getScrollHeight()
 
-newReview.setPageRow(1)
-newReview.getGeral()
+    if lastHeight == newScrollHeight:
+        break
+
