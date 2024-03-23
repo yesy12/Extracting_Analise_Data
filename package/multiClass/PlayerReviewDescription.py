@@ -37,4 +37,6 @@ class PlayerReviewDescription():
         for element_text in elements_text_strip:
             element += element_text
 
+        element = re.sub("'","", element)
+
         return element

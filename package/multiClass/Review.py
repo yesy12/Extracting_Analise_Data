@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from time import sleep
+from pyodbc import Error as pyErr
 
 from package.multiClass.PlayerReviewDescription import PlayerReviewDescription
 from package.multiClass.Likes import Likes
@@ -47,8 +48,10 @@ class Review():
                 self.getDescriptionForRewiew(appReviews)
 
                 self.getPlayerInfo(divCardRowReviewUniquePlayer)
-                self.saveSteamPeople()
-                self.saveGameInformation() 
+                # self.saveSteamPeople()
+                # self.saveGameInformation() 
+                
+        print("-"*100)
         
     def getScrollHeight(self) -> int:
         return self.driver.execute_script("return document.body.scrollHeight")
@@ -85,11 +88,10 @@ class Review():
             try:
                 self.conection.insert(sql)
                 print(f"Cadastrado: {self.title}")
-            except pyodbc.Error as Error:
-                print(Error)
-                
-                
-        # # plataforma = self.conection.select("select top 1 id from dbo.plataforma where nome='Steam';")
+            except pyErr:
+                print(pyErr)
+                                
+# # plataforma = self.conection.select("select top 1 id from dbo.plataforma where nome='Steam';")
     
     def saveSteamPeople(self) -> None:
         sql = f"select * from pessoaSteam where link = '{self.playerInfo.getLinkPlayerSteam()}';"        
@@ -104,8 +106,11 @@ class Review():
             try:
                 self.conection.insert(sql)
                 print("Usuario cadastrado")
-            except pyodbc.Error as Error:
-                print(Error) 
+            except pyErr:
+                print("-"*100)
+                print(f"SQL: {sql}")
+                print(f"Erro em usuario cadastrado: {pyErr}") 
+                print("-"*100)
 
     def saveGameInformation(self) -> None:
         sql = f"select TOP 1 id from pessoaSteam where link = '{self.playerInfo.getLinkPlayerSteam()}';"    
@@ -130,7 +135,10 @@ class Review():
         try:
             self.conection.insert(sql)
             print(f"\tCadastrado: {self.index}")
-        except pyodbc.Error as Error:
-            print(Error)
+        except pyErr:
+                print("-"*100)
+                print(f"SQL: {sql}")
+                print(f"Erro em cadastrado de review: {pyErr}") 
+                print("-"*100)
         
         
