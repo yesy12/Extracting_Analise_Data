@@ -1,14 +1,15 @@
 from selenium.webdriver.common.by import By
 from package.functions import replace
-import names
-from random import randint
+from time import sleep
+
+from .PlayerInfosReviewComments import PlayerInfosReviewComments
 
 class PlayerInfo:
 
-    def __init__(self, driverApp) -> None:
+    def __init__(self, driverApp, linkNew, driver) -> None:
         self.driverApp = driverApp
-   
-        
+        self.linkNew = linkNew
+        self.comments = PlayerInfosReviewComments(driver, self.linkNew)
 
     def getLinkPlayerSteam(self) -> str:
 
@@ -23,17 +24,22 @@ class PlayerInfo:
             return int(replace(quantify))
         except:
             return -1
-
     
     def getQuantifyCommentAboutFromReview(self) -> int:
         quantify = self.driverApp.find_element(By.CLASS_NAME,"apphub_UserReviewCardStats")
         return int(quantify.text)
         
-    def getRandomNickname(self) -> str:
-        name = names.get_first_name()
-        return f"{name}_{randint(1,100000)}"
+
     
-    
-    def clickQuantifyComment(self) -> None:
-        pass
+    def clickQuantifyComment(self) :
+        if self.getQuantifyCommentAboutFromReview() > 0:
+            self.comments.openNewTab()
+            sleep(2)
+            comentarios = self.comments.getComentarios()
+
+            self.comments.closeTab()
+            return comentarios
+        else:
+            return []
         
+    
