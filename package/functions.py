@@ -21,7 +21,7 @@ def replaceHours(text) -> str:
 def replaceDateAndSplit(text):
     date = re.sub("Publicada: ","", text)
     date = re.sub(" ","", date)
-    dezembro = re.search("dezembro",date)
+    dezembro = searchText("dezembro",date)
 
     date = re.split("de", date)
 
@@ -33,6 +33,10 @@ def replaceDateAndSplit(text):
 
     date[0] = int(date[0])
     return date
+
+def searchText(text, variable):
+    return re.search(rf"{text}", variable)
+
 
 def replaceJump(text) -> str:
     result = re.sub("\n", " " , text)
@@ -65,6 +69,13 @@ def addYearDatePublish(params):
     if len(params) == 2:
         params = params + [datetime.now().year]
     return params
+
+def addMonthDatePublish():
+    return datetime.now().month
+
+def addDayDatePublish():
+    return datetime.now().day
+    
 
 def getRandomNickname() -> str:
     name = names.get_first_name()
