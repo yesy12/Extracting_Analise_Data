@@ -1,7 +1,7 @@
 import pyodbc
 from platform import node
 from dotenv import load_dotenv
-import os
+from os import getcwd
 
 load_dotenv()  
 
@@ -43,7 +43,7 @@ class credential:
             print("INSERIDO")
 
     def initStructure(self):
-        diretorioActual = f"{os.getcwd()}/Extracting_Data/sql/"
+        diretorioActual = f"{getcwd()}/Extracting_Data/sql/"
         self.openFile(f"{diretorioActual}SqlCreateTable.sql")
         self.openFile(f"{diretorioActual}SqlAlterTable.sql")
         self.openFile(f"{diretorioActual}SqlQueryInsert.sql")
