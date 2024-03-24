@@ -20,7 +20,7 @@ class Save:
                 print(pyErr)
 
     def saveSteamPeople(self, link) -> int:
-        sql = f"select id from pessoaSteam where link = '{link}';"
+        sql = f"select TOP 1 id,relevancia from pessoaSteam where link = '{link}';"
         results = self.connection.select(sql)
 
         try:
@@ -31,7 +31,7 @@ class Save:
                     self.connection.cursor.execute("SELECT SCOPE_IDENTITY() AS ID")
 
                     steamIDUser = self.connection.cursor.fetchone()[0]
-                    print(f"Usuario cadastrado: {steamIDUser}")
+                    print(f"\t\tUsuario cadastrado: {steamIDUser}")
                     return steamIDUser
                 
                 except pyErr:
@@ -41,14 +41,20 @@ class Save:
                     print("-"*100)
                     return -1
             else:
-                for row in results[0]:
-                    return row
+                id = results[0][0]
+                relevancia = results[0][1]
 
-        except:
-            print("Tabela não cadastradas") 
+                sql = f"update pessoaSteam set relevancia = {relevancia} + 1 where link = '{link}';"
+                self.connection.insert(sql)
+
+                print(f"\t\tRelevância alterada de: {relevancia} para: {relevancia+1}")
+                return id
+            
+        except pyErr:
+            print(pyErr)
             return -1                      
 
-    def saveGameInformation(self, player, vote, likes, playerInfo, idGame, index) -> None:
+    def saveGameInformation(self, player, vote, likes, playerInfo, idGame) -> None:
         sql = f"select TOP 1 id from pessoaSteam where link = '{playerInfo.getLinkPlayerSteam()}';"    
         results = self.connection.select(sql)
         result = 0
@@ -69,7 +75,7 @@ class Save:
             self.connection.insert(sql)
             self.connection.cursor.execute("SELECT SCOPE_IDENTITY() AS ID")
             postIDReview = self.connection.cursor.fetchone()[0]
-            print(f"\tCadastrado: {index}")
+            print(f"\tPostagem Cadastrada: {postIDReview}")
             return postIDReview
         except pyErr:
                 print("-"*100)
@@ -82,7 +88,9 @@ class Save:
 		values					('{datePublished}','{commentText}',{idPostReview},{idSteam}, GETDATE(), GETDATE())"""
         try:
             self.connection.insert(sql)
-            print("\tComentario Publicado")
+            self.connection.cursor.execute("SELECT SCOPE_IDENTITY() AS ID")
+            comentIDReview = self.connection.cursor.fetchone()[0]
+            print(f"\t\tComentario Cadastrado: {comentIDReview}")
         except pyErr:
             print(f"Error: {pyErr}")
             print("Tabela não cadastrada")
