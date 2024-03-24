@@ -45,28 +45,31 @@ class Review():
 
         self.save.saveGameTitle(self.AppIDGame, title, linkGameSteam)
 
-    def setPageRow(self, pageIndex) -> None:
+    def setPageRow(self, pageIndex, indexUnique=False) -> None:
         pageRow = self.driver.find_element(By.ID, f"page{pageIndex}")
         print(f"Página: {pageIndex}")
 
-        # self.divCardRows = pageRow.find_elements(By.XPATH,"//div[@class='apphub_CardRow' ]")
-        self.divCardRow = pageRow.find_element(By.ID, "page_1_row_6_template_largeFallback")
+        self.divCardRows = pageRow.find_elements(By.XPATH,"//div[@class='apphub_CardRow' ]")
+
+        if(indexUnique == True):
+            self.divCardRow = pageRow.find_element(By.ID, "page_1_row_1_template_twoSmall")
    
     def getUnique(self) -> None:
-        divCardRowReviewUniquePlayer = self.divCardRow.find_element(By.CLASS_NAME, "apphub_Card")
-        geral = divCardRowReviewUniquePlayer.find_element(By.CLASS_NAME, "apphub_CardContentMain")
-        appReviews = geral.find_element(By.CLASS_NAME,"apphub_UserReviewCardContent") 
+        pass
+        # divCardRowReviewUniquePlayer = self.divCardRow.find_element(By.CLASS_NAME, "apphub_Card")
+        # geral = divCardRowReviewUniquePlayer.find_element(By.CLASS_NAME, "apphub_CardContentMain")
+        # appReviews = geral.find_element(By.CLASS_NAME,"apphub_UserReviewCardContent") 
                             
-        self.getDescriptionForLikes(appReviews)
-        self.getDescriptionForVote(appReviews)
-        self.getDescriptionForRewiew(appReviews)
+        # self.getDescriptionForLikes(appReviews)
+        # self.getDescriptionForVote(appReviews)
+        # self.getDescriptionForRewiew(appReviews)
 
-        self.getPlayerInfo(divCardRowReviewUniquePlayer)
-        self.save.saveSteamPeople(self.playerInfo.getLinkPlayerSteam())
-        self.postIDReview = self.save.saveGameInformation(self.player, self.vote, self.likes, self.playerInfo, self.AppIDGame, self.index)
-        sleep(3)
+        # self.getPlayerInfo(divCardRowReviewUniquePlayer)
+        # self.save.saveSteamPeople(self.playerInfo.getLinkPlayerSteam())
+        # self.postIDReview = self.save.saveGameInformation(self.player, self.vote, self.likes, self.playerInfo, self.AppIDGame)
+        # sleep(3)
 
-        self.getComments()
+        # self.getComments()
 
     def getGeral(self) -> None:
         for divCardRow in self.divCardRows:                
@@ -83,7 +86,13 @@ class Review():
 
                 self.getPlayerInfo(divCardRowReviewUniquePlayer)
                 self.save.saveSteamPeople(self.playerInfo.getLinkPlayerSteam())
-                self.postIDReview = self.save.saveGameInformation(self.player, self.vote, self.likes, self.playerInfo, self.AppIDGame, self.index)
+                self.postIDReview = self.save.saveGameInformation(self.player, self.vote, self.likes, self.playerInfo, self.AppIDGame)
+
+                if self.getComments() == True:
+                    sleep(3)                 
+                    handles = self.driver.window_handles                    
+                    self.driver.switch_to.window(handles[0])
+
                 
         print("-"*100)
         
@@ -111,16 +120,20 @@ class Review():
         self.linkReviews = divCardRowRewiewUniquePlayerDriver.get_attribute("data-modal-content-url")        
         self.playerInfo = PlayerInfo(appPlayersInfo,self.linkReviews, self.driver)
 
-    def getComments(self) -> None:
+    def getComments(self) -> bool:
         comentarios = self.playerInfo.clickQuantifyComment()
 
         if(len(comentarios) > 0):
             for comentario in comentarios:
                 comment_ = Commnents()
+
                 comentario[1] = comment_.formaterDate(comentario[1])
                 comentario[2] = comment_.formaterComment(comentario[2])
-                
+
                 self.steamIDUser = self.save.saveSteamPeople(comentario[0])
                 if self.steamIDUser != -1 and self.postIDReview != -1:
                     self.save.saveCommentsAboutReview(comentario[1], comentario[2], self.postIDReview, self.steamIDUser)
+            return True
+
+        return False
               
