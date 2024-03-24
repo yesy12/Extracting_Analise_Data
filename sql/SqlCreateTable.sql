@@ -83,7 +83,7 @@ if not exists (select * from information_schema.tables  where table_name = 'revi
 		);  
 	end;
 
-if not exists (select * from information_schema.tables where table_name = '')
+if not exists (select * from information_schema.tables where table_name = 'reviewAboutComments')
 	begin
 		create table reviewAboutComments(
 			id int not null identity(1,1),
