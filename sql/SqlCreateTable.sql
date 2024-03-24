@@ -82,3 +82,18 @@ if not exists (select * from information_schema.tables  where table_name = 'revi
 			primary key(id)
 		);  
 	end;
+
+if not exists (select * from information_schema.tables where table_name = '')
+	begin
+		create table reviewAboutComments(
+			id int not null identity(1,1),
+			dataPublicada date not null,
+			comments text not null,
+
+			idPostReview int not null,
+			idSteam int null, 
+			dataCadastro date not null,
+			dataAlterado date
+			primary key(id)
+		)
+	end;
