@@ -11,7 +11,10 @@ class Likes:
         self.foundSplit = split(found)      
     
     def getLikesEmoticon(self) -> int:
-        return int( self.foundSplit[ len( self.foundSplit) -1 ] )
+        try:
+            return int( self.foundSplit[ len( self.foundSplit) -1 ] )
+        except:
+            return 0
     
     def getLikesFunny(self) -> int:
         try:
@@ -20,4 +23,8 @@ class Likes:
             return 0
     
     def getLikesUtil(self) -> int:
-        return int(self.foundSplit[0])
+        try:
+            return int(self.foundSplit[0])
+        except:
+            print("ERRO")
+            return 0
