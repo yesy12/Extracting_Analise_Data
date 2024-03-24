@@ -1,9 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from time import sleep
-from pyodbc import Error as pyErr
-
-import os
 
 from os import path
 from sys import path as path2
@@ -33,6 +30,20 @@ class Review():
 
     def getLink(self, link) -> None:
         self.driver.get(link)
+
+
+    def getAllReviews(self)-> None:
+        while True:
+            lastHeight = self.getScrollHeight()
+            self.scroll()
+            newScrollHeight = self.getScrollHeight()
+            if lastHeight == newScrollHeight:
+                break
+        
+        sleep(2)
+        allReview = self.driver.find_element(By.CLASS_NAME, "view_all_reviews_btn")
+        allReview.click()
+        
 
     def gameActual(self):
         div = self.driver.find_element(By.CLASS_NAME, "apphub_OtherSiteInfo")                   

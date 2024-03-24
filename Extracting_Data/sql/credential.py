@@ -43,8 +43,7 @@ class credential:
             print("INSERIDO")
 
     def initStructure(self):
-        diretorioActual = f"{os.getcwd()}/sql/"
-
+        diretorioActual = f"{os.getcwd()}/Extracting_Data/sql/"
         self.openFile(f"{diretorioActual}SqlCreateTable.sql")
         self.openFile(f"{diretorioActual}SqlAlterTable.sql")
         self.openFile(f"{diretorioActual}SqlQueryInsert.sql")

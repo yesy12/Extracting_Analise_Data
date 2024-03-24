@@ -10,14 +10,18 @@ class Save:
     def saveGameTitle(self, idGame, title, linkGameSteam) -> bool:
         sql = f"select TOP 1 * from gameCadastrado where id = {idGame};"
         results = self.connection.select(sql)
-
-        if (len(results) > 0) == False:
-            sql = f""" insert into gameCadastrado (id, plataforma, titulo, link, dataCadastro, dataAlterado) values ({idGame}, 1, '{title}', '{linkGameSteam}', GETDATE(),GETDATE());"""
-            try:
-                self.connection.insert(sql)
-                print(f"Cadastrado: {title}")
-            except pyErr:
-                print(pyErr)
+        print(results)
+        try:
+            if (len(results) > 0) == False:
+                sql = f""" insert into gameCadastrado (id, plataforma, titulo, link, dataCadastro, dataAlterado) values ({idGame}, 1, '{title}', '{linkGameSteam}', GETDATE(),GETDATE());"""
+                try:
+                    self.connection.insert(sql)
+                    print(f"Cadastrado: {title}")
+                except pyErr:
+                    print(pyErr)
+        except:
+            print("Erro")          
+             
 
     def saveSteamPeople(self, link) -> int:
         sql = f"select TOP 1 id,relevancia from pessoaSteam where link = '{link}';"
