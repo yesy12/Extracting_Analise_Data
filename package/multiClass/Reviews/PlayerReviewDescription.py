@@ -1,7 +1,6 @@
 from selenium.webdriver.common.by import By
-from package.functions import replaceDateAndSplit,getIndexsFromMonth,addYearDatePublish, splitSpecific
+from package.functions import replaceDateAndSplit,getIndexsFromMonth,addYearDatePublish, splitSpecific,subSpecificParams
 from lxml import html
-import re
 
 class PlayerReviewDescription():
 
@@ -28,8 +27,8 @@ class PlayerReviewDescription():
         elements_text_strip = []
         
         for element in elements:
-            e = re.sub("\t","",element.text_content().strip())
-            e = re.sub("Publicada: [0-9].+\n","",e) 
+            e = subSpecificParams("\t","",element.text_content().strip())
+            e = subSpecificParams("Publicada: [0-9].+\n","",e)
                       
             elements_text_strip.append(e)
   
@@ -37,6 +36,6 @@ class PlayerReviewDescription():
         for element_text in elements_text_strip:
             element += element_text
 
-        element = re.sub("'","", element)
+        element = subSpecificParams("'","", element)
 
         return element

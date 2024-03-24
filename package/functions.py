@@ -69,3 +69,7 @@ def addYearDatePublish(params):
 def getRandomNickname() -> str:
     name = names.get_first_name()
     return f"{name}_{randint(1,100000)}"
+
+def subSpecificParams(params, replace, text) -> str:
+    result = re.sub(f"{params}", replace, text)
+    return result
