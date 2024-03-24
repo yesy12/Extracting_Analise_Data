@@ -1,7 +1,7 @@
 import pyodbc
 from platform import node
 from dotenv import load_dotenv
-from os import getcwd
+from os import getcwd, environ
 
 load_dotenv()  
 
@@ -9,7 +9,7 @@ class credential:
 
     def __init__(self) -> None:   
         try:
-            database =  os.environ["database"]
+            database = environ["database"]
             dados_conexao = (
                 "Driver={Sql Server};"
                 f"Server={node()};"

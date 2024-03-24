@@ -43,8 +43,6 @@ class Review():
             sleep(0.2)
             self.accessPage()
 
-
-
     def setMyDateFromGetAllReviews(self):
         ageDay = Select(self.driver.find_element(By.ID,"ageDay"))
         ageMonth = Select(self.driver.find_element(By.ID,"ageMonth"))

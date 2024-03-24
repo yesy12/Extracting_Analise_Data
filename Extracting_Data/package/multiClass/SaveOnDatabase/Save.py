@@ -103,5 +103,4 @@ class Save:
         results = self.connection.select(sql)
 
         count = results[0][0]
-        print(count)
         return count
