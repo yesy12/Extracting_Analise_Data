@@ -10,7 +10,6 @@ class Save:
     def saveGameTitle(self, idGame, title, linkGameSteam) -> bool:
         sql = f"select TOP 1 * from gameCadastrado where id = {idGame};"
         results = self.connection.select(sql)
-        print(results)
         try:
             if (len(results) > 0) == False:
                 sql = f""" insert into gameCadastrado (id, plataforma, titulo, link, dataCadastro, dataAlterado) values ({idGame}, 1, '{title}', '{linkGameSteam}', GETDATE(),GETDATE());"""
@@ -98,3 +97,11 @@ class Save:
         except pyErr:
             print(f"Error: {pyErr}")
             print("Tabela não cadastrada")
+
+    def CountReviewsFromIdGame(self, idGame):
+        sql = f"select TOP 1 count(id) from reviewCompleta where gameCadastrado = '{idGame}';"
+        results = self.connection.select(sql)
+
+        count = results[0][0]
+        print(count)
+        return count

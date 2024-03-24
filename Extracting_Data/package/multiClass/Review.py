@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
 from time import sleep
 
 from os import path
@@ -18,6 +19,8 @@ from package.multiClass.PlayerAboutInformation.Comments.Comments import Commnent
 
 from package.multiClass.SaveOnDatabase.Save import Save
 
+import re
+
 class Review():
 
     def __init__(self, ) -> None:
@@ -30,6 +33,30 @@ class Review():
 
     def getLink(self, link) -> None:
         self.driver.get(link)
+
+    def ageCheck(self) -> None:
+        link = self.driver.current_url
+        find = re.search(r"agecheck",link)
+
+        if find:
+            self.setMyDateFromGetAllReviews()
+            sleep(0.2)
+            self.accessPage()
+
+
+
+    def setMyDateFromGetAllReviews(self):
+        ageDay = Select(self.driver.find_element(By.ID,"ageDay"))
+        ageMonth = Select(self.driver.find_element(By.ID,"ageMonth"))
+        ageYear = Select(self.driver.find_element(By.ID,"ageYear"))
+
+        ageDay.select_by_index(0)
+        ageMonth.select_by_index(0)
+        ageYear.select_by_index(0)
+
+    def accessPage(self):
+        accessPage = self.driver.find_element(By.ID, "view_product_page_btn")
+        accessPage.click()
 
 
     def getAllReviews(self)-> None:
@@ -65,6 +92,9 @@ class Review():
         if(indexUnique == True):
             self.divCardRow = pageRow.find_element(By.ID, "page_1_row_1_template_twoSmall")
    
+    def exitOnThisGame(self, quantify):
+        return self.save.CountReviewsFromIdGame(self.AppIDGame)  > quantify
+
     def getUnique(self) -> None:
         pass
         # divCardRowReviewUniquePlayer = self.divCardRow.find_element(By.CLASS_NAME, "apphub_Card")
