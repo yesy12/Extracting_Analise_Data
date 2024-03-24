@@ -3,10 +3,24 @@ from selenium.webdriver.common.by import By
 from time import sleep
 from pyodbc import Error as pyErr
 
-from package.multiClass.PlayerReviewDescription import PlayerReviewDescription
-from package.multiClass.Likes import Likes
-from package.multiClass.Vote import Vote
-from package.multiClass.PlayerInfos import PlayerInfo
+import os
+
+from os import path
+from sys import path as path2
+
+root_dir = path.dirname(path.abspath(__file__))
+path2.append(path.join(root_dir, ".."))
+
+from functions import getRandomNickname
+
+from package.multiClass.Reviews.PlayerReviewDescription import PlayerReviewDescription
+
+from package.multiClass.Descriptions.Likes import Likes
+from package.multiClass.Descriptions.Vote import Vote
+
+from package.multiClass.PlayerAboutInformation.PlayerInfos import PlayerInfo
+from package.multiClass.PlayerAboutInformation.Comments.Comment import Commnent
+
 
 from sql.credential import credential
 
@@ -16,6 +30,7 @@ class Review():
         self.driver = webdriver.Edge()
         self.conection = credential()
         self.index = 0
+        self.postIDReview = 0
 
     def getLink(self, link) -> None:
         self.driver.get(link)
@@ -32,8 +47,25 @@ class Review():
         pageRow = self.driver.find_element(By.ID, f"page{pageIndex}")
         print(f"Página: {pageIndex}")
 
-        self.divCardRows = pageRow.find_elements(By.XPATH,"//div[@class='apphub_CardRow' ]")
+        # self.divCardRows = pageRow.find_elements(By.XPATH,"//div[@class='apphub_CardRow' ]")
+        self.divCardRow = pageRow.find_element(By.ID, "page_1_row_6_template_largeFallback")
    
+    def getUnique(self) -> None:
+        divCardRowReviewUniquePlayer = self.divCardRow.find_element(By.CLASS_NAME, "apphub_Card")
+        geral = divCardRowReviewUniquePlayer.find_element(By.CLASS_NAME, "apphub_CardContentMain")
+        appReviews = geral.find_element(By.CLASS_NAME,"apphub_UserReviewCardContent") 
+                            
+        self.getDescriptionForLikes(appReviews)
+        self.getDescriptionForVote(appReviews)
+        self.getDescriptionForRewiew(appReviews)
+
+        self.getPlayerInfo(divCardRowReviewUniquePlayer)
+        self.saveSteamPeople(self.playerInfo.getLinkPlayerSteam())
+        self.saveGameInformation()
+        sleep(3)
+
+        self.getComments()
+
     def getGeral(self) -> None:
         for divCardRow in self.divCardRows:                
             divCardRowRewiewUniquePlayers = divCardRow.find_elements(By.CLASS_NAME, "apphub_Card")
@@ -48,8 +80,8 @@ class Review():
                 self.getDescriptionForRewiew(appReviews)
 
                 self.getPlayerInfo(divCardRowReviewUniquePlayer)
-                # self.saveSteamPeople()
-                # self.saveGameInformation() 
+                self.saveSteamPeople(self.playerInfo.getLinkPlayerSteam())
+                self.saveGameInformation() 
                 
         print("-"*100)
         
@@ -58,8 +90,7 @@ class Review():
 
     def scroll(self):
         self.driver.execute_script(f"window.scrollTo(0,{self.getScrollHeight()})")
-        sleep(2)
-        
+        sleep(2)      
 
     def getDescriptionForLikes(self, appReviewsDriver) -> None:
         found = appReviewsDriver.find_element(By.CLASS_NAME, "found_helpful").text
@@ -75,7 +106,19 @@ class Review():
     
     def getPlayerInfo(self, divCardRowRewiewUniquePlayerDriver) -> None:
         appPlayersInfo = divCardRowRewiewUniquePlayerDriver.find_element(By.CLASS_NAME,"apphub_CardContentAuthorBlock")
-        self.playerInfo = PlayerInfo(appPlayersInfo)
+        self.linkReviews = divCardRowRewiewUniquePlayerDriver.get_attribute("data-modal-content-url")        
+        self.playerInfo = PlayerInfo(appPlayersInfo,self.linkReviews, self.driver)
+
+    def getComments(self) -> None:
+        comentarios = self.playerInfo.clickQuantifyComment()
+        print(self.postIDReview)
+
+        if(len(comentarios) > 0):
+            for comentario in comentarios:
+                comment_ = Commnent()
+                comentario[1] = comment_.formaterDate(comentario[1])
+                self.saveSteamPeople(comentario[0])
+
 
     def saveGameTitle(self) -> None:
         sql = f"select TOP 1 * from gameCadastrado where id = {self.AppIDGame};"
@@ -93,24 +136,23 @@ class Review():
                                 
 # # plataforma = self.conection.select("select top 1 id from dbo.plataforma where nome='Steam';")
     
-    def saveSteamPeople(self) -> None:
-        sql = f"select * from pessoaSteam where link = '{self.playerInfo.getLinkPlayerSteam()}';"        
+    def saveSteamPeople(self, link) -> None:
+        sql = f"select id from pessoaSteam where link = '{link}';"
         results = self.conection.select(sql)
-        
-        if(len(results) > 0) == False:
-            sql = f"""
-            insert into pessoaSteam(
-                Nickname, link, relevancia) 
-            values ('{self.playerInfo.getRandomNickname()}', '{self.playerInfo.getLinkPlayerSteam()}', 0)
-            """
-            try:
-                self.conection.insert(sql)
-                print("Usuario cadastrado")
-            except pyErr:
-                print("-"*100)
-                print(f"SQL: {sql}")
-                print(f"Erro em usuario cadastrado: {pyErr}") 
-                print("-"*100)
+
+        try:
+            if(len(results) > 0) == False:
+                sql = f"""insert into pessoaSteam(Nickname, link, relevancia) values ('{getRandomNickname()}', '{link}', 0)"""
+                try:
+                    self.conection.insert(sql)
+                    print("Usuario cadastrado")
+                except pyErr:
+                    print("-"*100)
+                    print(f"SQL: {sql}")
+                    print(f"Erro em usuario cadastrado: {pyErr}") 
+                    print("-"*100)
+        except:
+            print("Tabela não cadastradas")
 
     def saveGameInformation(self) -> None:
         sql = f"select TOP 1 id from pessoaSteam where link = '{self.playerInfo.getLinkPlayerSteam()}';"    
@@ -134,6 +176,8 @@ class Review():
         """
         try:
             self.conection.insert(sql)
+            self.conection.cursor.execute("SELECT SCOPE_IDENTITY() AS ID")
+            self.postIDReview = self.conection.cursor.fetchone()[0]
             print(f"\tCadastrado: {self.index}")
         except pyErr:
                 print("-"*100)
@@ -141,4 +185,6 @@ class Review():
                 print(f"Erro em cadastrado de review: {pyErr}") 
                 print("-"*100)
         
-        
+    def saveCommentsAboutReview(self) -> None:
+        sql = f"""insert into reviewAboutComments(dataPublicada, comments, idPostReview, idSteam, dataCadastro, dataAlterado)
+		values					('29-05-2023','meus parabéns e isso ai',2,29, GETDATE(), GETDATE())"""
