@@ -1,9 +1,12 @@
 import re
 from datetime import datetime
+import names
+from random import randint
  
  
 regexDefault = "([A-z]| |á|ú|ç)+"
 tableMonth = ["janeiro","fevereiro", "março", "abril", "maio", "junho","julho","agosto", "setembro", "outubro", "novembro", "dezembro"]
+tableMonthComments = ["jan.","fev.", "mar.", "abr.", "mai.", "jun.","jul.","ago.", "set.", "out.", "nov.", "dez."]
 
 default = re.compile(regexDefault)
 
@@ -50,7 +53,19 @@ def getIndexsFromMonth(text) -> int:
     except:
         return -1
     
+def getIndexsFromMonthCommnets(text) -> int:
+    try:        
+        index = tableMonthComments.index(text) + 1
+        return index
+    except:
+        return -1    
+
+
 def addYearDatePublish(params):
     if len(params) == 2:
         params = params + [datetime.now().year]
     return params
+
+def getRandomNickname() -> str:
+    name = names.get_first_name()
+    return f"{name}_{randint(1,100000)}"
