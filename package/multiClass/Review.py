@@ -19,7 +19,7 @@ from package.multiClass.Descriptions.Likes import Likes
 from package.multiClass.Descriptions.Vote import Vote
 
 from package.multiClass.PlayerAboutInformation.PlayerInfos import PlayerInfo
-from package.multiClass.PlayerAboutInformation.Comments.Comment import Commnent
+from package.multiClass.PlayerAboutInformation.Comments.Comments import Commnents
 
 
 from sql.credential import credential
@@ -30,7 +30,9 @@ class Review():
         self.driver = webdriver.Edge()
         self.conection = credential()
         self.index = 0
+
         self.postIDReview = 0
+        self.steamIDUser = 0
 
     def getLink(self, link) -> None:
         self.driver.get(link)
@@ -115,9 +117,12 @@ class Review():
 
         if(len(comentarios) > 0):
             for comentario in comentarios:
-                comment_ = Commnent()
+                comment_ = Commnents()
                 comentario[1] = comment_.formaterDate(comentario[1])
+                comentario[2] = comment_.formaterComment(comentario[2])
+
                 self.saveSteamPeople(comentario[0])
+                self.saveCommentsAboutReview(comentario[1], comentario[2], self.postIDReview, self.steamIDUser)
 
 
     def saveGameTitle(self) -> None:
@@ -145,12 +150,17 @@ class Review():
                 sql = f"""insert into pessoaSteam(Nickname, link, relevancia) values ('{getRandomNickname()}', '{link}', 0)"""
                 try:
                     self.conection.insert(sql)
-                    print("Usuario cadastrado")
+                    self.conection.cursor.execute("SELECT SCOPE_IDENTITY() AS ID")
+                    self.steamIDUser = self.conection.cursor.fetchone()[0]
+                    print(f"Usuario cadastrado: {self.steamIDUser}")
                 except pyErr:
                     print("-"*100)
                     print(f"SQL: {sql}")
                     print(f"Erro em usuario cadastrado: {pyErr}") 
                     print("-"*100)
+            else:
+                for row in results[0]:
+                    self.steamIDUser = row
         except:
             print("Tabela não cadastradas")
 
@@ -185,6 +195,12 @@ class Review():
                 print(f"Erro em cadastrado de review: {pyErr}") 
                 print("-"*100)
         
-    def saveCommentsAboutReview(self) -> None:
+    def saveCommentsAboutReview(self, datePublished, commentText, idPostReview, idSteam) -> None:
         sql = f"""insert into reviewAboutComments(dataPublicada, comments, idPostReview, idSteam, dataCadastro, dataAlterado)
-		values					('29-05-2023','meus parabéns e isso ai',2,29, GETDATE(), GETDATE())"""
+		values					('{datePublished}','{commentText}',{idPostReview},{idSteam}, GETDATE(), GETDATE())"""
+        try:
+            self.conection.insert(sql)
+            print("\tComentario Publicado")
+        except:
+            print("Tabela não cadastrada")
+              
