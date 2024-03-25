@@ -3,14 +3,16 @@ from package.functions import replace
 from time import sleep
 
 from .PlayerInfosReviewComments import PlayerInfosReviewComments
+
 from logging import error, warning, debug
 
 class PlayerInfo:
 
     def __init__(self, driverApp, linkNew, driver) -> None:
         self.driverApp = driverApp
+        self.driver = driver
         self.linkNew = linkNew
-        self.comments = PlayerInfosReviewComments(driver, self.linkNew)
+       
 
     def getLinkPlayerSteam(self) -> str:
 
@@ -36,21 +38,22 @@ class PlayerInfo:
             return int(quantify.text)
         except:
             warning("Error in the get Quantify games")
-            return 0
-        
-
+            return 0        
     
     def clickQuantifyComment(self) :
         if self.getQuantifyCommentAboutFromReview() > 0:
+            comentarios = []
+            self.comments = PlayerInfosReviewComments(self.driver, self.linkNew)
             self.comments.openNewTab()
             sleep(2)
+            
             comentarios = self.comments.getComentarios()
 
             self.comments.closeTab()
             debug("Get Comment")
             return comentarios
         else:
-            warning("Error in the get Quantify Game")
+            warning("Error in the get Quantify Comment")
             return []
         
     
