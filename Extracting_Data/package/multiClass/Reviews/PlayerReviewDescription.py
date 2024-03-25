@@ -1,6 +1,7 @@
 from selenium.webdriver.common.by import By
 from package.functions import replaceDateAndSplit,getIndexsFromMonth,addYearDatePublish, splitSpecific,subSpecificParams
 from lxml import html
+from logging import debug
 
 class PlayerReviewDescription():
 
@@ -16,6 +17,7 @@ class PlayerReviewDescription():
         publish[2] = int(publish[2])
         
         publish = f"{publish[2]}-{publish[1]}-{publish[0]}"
+        debug("Publish day")
         return publish
 
     def getReviewAboutTheGame(self) -> str:    
@@ -38,4 +40,5 @@ class PlayerReviewDescription():
 
         element = subSpecificParams("'","", element)
 
+        debug("Review from player")
         return element

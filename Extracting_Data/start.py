@@ -3,14 +3,22 @@ from time import sleep
 
 from package.multiClass.Review import Review
 from os import getcwd
+import logging
+
 
 newReview = Review()
+logging.basicConfig(
+    filemode="a",
+    filename="Extracting_Data/logs/log.log",
+    level=logging.INFO
+)
+
 
 diretorioAtual = f"{getcwd()}/Extracting_Data/games.txt"
 
 with open(diretorioAtual, "r", encoding="utf-8") as lines:
     for line in lines.readlines():    
-        print(f"Jogo: {line}")      
+        logging.debug(f"Jogo: {line}")      
         newReview.getLink(line)
         newReview.ageCheck()
         newReview.getAllReviews()
@@ -23,7 +31,7 @@ with open(diretorioAtual, "r", encoding="utf-8") as lines:
             result = newReview.exitOnThisGame(1000)
 
             if result == True:
-                print("Proximo")
+                logging.DEBUG("Proximo")
                 break   
 
             newReview.getGeral()

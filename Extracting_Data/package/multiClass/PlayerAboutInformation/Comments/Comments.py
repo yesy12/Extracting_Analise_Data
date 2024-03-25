@@ -2,6 +2,8 @@
 from functions import getIndexsFromMonthCommnets, splitSpecific, addYearDatePublish, subSpecificParams,searchText
 from functions import addMonthDatePublish,addDayDatePublish
 
+from logging import error
+
 class Commnents:
 
     def __init__(self) -> None:
@@ -11,23 +13,31 @@ class Commnents:
         exists = searchText("há \d+ horas", comentDate)
         
         if exists == None:            
-            comentDate = splitSpecific(r"às \d+:\d+", comentDate)[0]
-            if(len(comentDate) == 13):
-                comentDate = splitSpecific(r"/", comentDate)
+            comentDate_ = splitSpecific(r"às \d+:\d+", comentDate)[0]
+            if(len(comentDate_) == 13):
+                comentDate_ = splitSpecific(r"/", comentDate_)
 
-            elif(len(comentDate) == 11):
-                comentDate = splitSpecific(" de ", comentDate)
-                comentDate[1] = comentDate[1][0:4]
+            elif(len(comentDate_) == 11):
+                comentDate_ = splitSpecific(" de ", comentDate_)
+                comentDate_[1] = comentDate_[1][0:4]
                         
-            if type(comentDate) == str:
-                comentDate = splitSpecific("/", comentDate)        
+            if type(comentDate_) == str:
+                comentDate_ = splitSpecific("/", comentDate_)        
 
-            comentDate[1] = getIndexsFromMonthCommnets(comentDate[1])
+            # print(comentDate) ""
+            # ['6 de fev. ']
+            try:
+                comentDate_[1] = getIndexsFromMonthCommnets(comentDate_[1])
 
-            if len(comentDate) == 3:
-                comentDate[2] = int(comentDate[2])
-            else:
-                comentDate = addYearDatePublish(comentDate)    
+                if len(comentDate_) == 3:
+                    comentDate_[2] = int(comentDate_[2])
+                else:
+                    comentDate_ = addYearDatePublish(comentDate_)    
+
+                return f"{comentDate_[0]}-{comentDate_[1]}-{comentDate_[2]}"
+            except:
+                error(f"Erro em data: {comentDate}")
+                return "01-01-2000"
 
         else:
             comentDate = []

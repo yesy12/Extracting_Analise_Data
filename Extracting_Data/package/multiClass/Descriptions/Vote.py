@@ -1,6 +1,7 @@
 from selenium.webdriver.common.by import By
 from package.functions import replaceHours,replace
- 
+
+from logging import warning
 
 class Vote:
 
@@ -18,5 +19,9 @@ class Vote:
         
     def getHoursPlayers(self) -> float:
         hours = self.driverApp.find_element(By.CLASS_NAME, "hours").text
-        return float (replace(replaceHours(hours)))
+        try:
+            return float (replace(replaceHours(hours)))
+        except:
+            warning(f"Float Hours: {hours}")
+            return float(0)
         

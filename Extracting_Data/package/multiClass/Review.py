@@ -20,6 +20,7 @@ from package.multiClass.PlayerAboutInformation.Comments.Comments import Commnent
 from package.multiClass.SaveOnDatabase.Save import Save
 
 import re
+import logging
 
 class Review():
 
@@ -35,6 +36,7 @@ class Review():
         self.driver.get(link)
 
     def ageCheck(self) -> None:
+        logging.debug("agecheck on the link")
         link = self.driver.current_url
         find = re.search(r"agecheck",link)
 
@@ -66,6 +68,7 @@ class Review():
                 break
         
         sleep(2)
+        logging.debug("Get all reviews page")
         allReview = self.driver.find_element(By.CLASS_NAME, "view_all_reviews_btn")
         allReview.click()
         
@@ -83,7 +86,7 @@ class Review():
 
     def setPageRow(self, pageIndex, indexUnique=False) -> None:
         pageRow = self.driver.find_element(By.ID, f"page{pageIndex}")
-        print(f"Página: {pageIndex}")
+        logging.debug(f"Page: {pageIndex}")
 
         self.divCardRows = pageRow.find_elements(By.XPATH,"//div[@class='apphub_CardRow' ]")
 
@@ -128,7 +131,8 @@ class Review():
                 self.postIDReview = self.save.saveGameInformation(self.player, self.vote, self.likes, self.playerInfo, self.AppIDGame)
 
                 if self.getComments() == True:
-                    sleep(3)                 
+                    sleep(3)                
+                    logging.debug("Comment") 
                     handles = self.driver.window_handles                    
                     self.driver.switch_to.window(handles[0])
 
