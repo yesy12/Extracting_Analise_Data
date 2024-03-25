@@ -8,8 +8,9 @@ import logging
 
 newReview = Review()
 logging.basicConfig(
-    filemode="a",
+    filemode="w",
     filename="Extracting_Data/logs/log.log",
+    encoding="utf-8",
     level=logging.INFO
 )
 
@@ -31,7 +32,7 @@ with open(diretorioAtual, "r", encoding="utf-8") as lines:
             result = newReview.exitOnThisGame(1000)
 
             if result == True:
-                logging.DEBUG("Proximo")
+                logging.debug("Proximo")
                 break   
 
             newReview.getGeral()
