@@ -86,7 +86,7 @@ class Review():
 
     def setPageRow(self, pageIndex, indexUnique=False) -> None:
         pageRow = self.driver.find_element(By.ID, f"page{pageIndex}")
-        logging.debug(f"Page: {pageIndex}")
+        print(f"Page: {pageIndex}")
 
         self.divCardRows = pageRow.find_elements(By.XPATH,"//div[@class='apphub_CardRow' ]")
 
@@ -127,10 +127,10 @@ class Review():
                 self.getDescriptionForRewiew(appReviews)
 
                 self.getPlayerInfo(divCardRowReviewUniquePlayer)
-                self.save.saveSteamPeople(self.playerInfo.getLinkPlayerSteam())
+                self.steamIDUser = self.save.saveSteamPeople(self.playerInfo.getLinkPlayerSteam())
                 self.postIDReview = self.save.saveGameInformation(self.player, self.vote, self.likes, self.playerInfo, self.AppIDGame)
 
-                if self.getComments() == True:
+                if self.getComments() == True:                    
                     sleep(3)                
                     logging.debug("Comment") 
                     handles = self.driver.window_handles                    
@@ -164,19 +164,25 @@ class Review():
         self.playerInfo = PlayerInfo(appPlayersInfo,self.linkReviews, self.driver)
 
     def getComments(self) -> bool:
-        comentarios = self.playerInfo.clickQuantifyComment()
+        getCommentsBool = self.save.getSaveLinkReviewsCommentsRegistered(self.playerInfo.linkNew)
 
-        if(len(comentarios) > 0):
-            for comentario in comentarios:
-                comment_ = Commnents()
+        if( getCommentsBool == False):
+            comentarios = self.playerInfo.clickQuantifyComment()
 
-                comentario[1] = comment_.formaterDate(comentario[1])
-                comentario[2] = comment_.formaterComment(comentario[2])
+            if(len(comentarios) > 0):
+                self.save.saveLinkReviewsComments(self.playerInfo.linkNew, self.postIDReview, self.AppIDGame, self.steamIDUser)        
 
-                self.steamIDUser = self.save.saveSteamPeople(comentario[0])
-                if self.steamIDUser != -1 and self.postIDReview != -1:
-                    self.save.saveCommentsAboutReview(comentario[1], comentario[2], self.postIDReview, self.steamIDUser)
-            return True
+                for comentario in comentarios:
+                    comment_ = Commnents()
 
+                    comentario[1] = comment_.formaterDate(comentario[1])
+                    comentario[2] = comment_.formaterComment(comentario[2])
+
+                    self.steamIDUser = self.save.saveSteamPeople(comentario[0])
+                    if self.steamIDUser != -1 and self.postIDReview != -1:
+                        self.save.saveCommentsAboutReview(comentario[1], comentario[2], self.postIDReview, self.steamIDUser)
+                return True
+        else:
+            logging.info("Exists comments on database")
         return False
               
