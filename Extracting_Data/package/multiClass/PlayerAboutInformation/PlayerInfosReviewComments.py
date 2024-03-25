@@ -10,6 +10,8 @@ class PlayerInfosReviewComments:
         
 
     def openNewTab(self) -> None:
+        debug("Open new Link")
+        
         self.driverApp.execute_script(f"window.open('{self.link}', '_blank');")
         handles = self.driverApp.window_handles
         self.driverApp.switch_to.window(handles[1])

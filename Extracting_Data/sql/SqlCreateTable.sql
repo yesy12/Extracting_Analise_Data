@@ -104,6 +104,7 @@ if not exists(select * from information_schema.tables where table_name = 'commen
 			id int not null identity(1,1), 
 			linkSteamReviewComment varchar(200) unique not null,
 			postIDSteamReview int not null,
-			idSteamGame int not null
+			idSteamGame int not null,
+			idSteamPeoplePostReview int not null
 		);
 	end;

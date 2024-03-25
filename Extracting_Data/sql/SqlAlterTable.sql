@@ -33,3 +33,7 @@ ALTER TABLE commentRegistered
 ALTER TABLE commentRegistered
 	add constraint fkIdSteamComment foreign key(idSteamGame) 
 	references gameCadastrado(id);
+	
+ALTER TABLE commentRegistered
+	add constraint fkIdSteamPeoplePosted foreign key(idSteamPeoplePostReview) 
+	references gameCadastrado(id);

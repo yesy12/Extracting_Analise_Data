@@ -79,7 +79,7 @@ class Save:
             self.connection.insert(sql)
             self.connection.cursor.execute("SELECT SCOPE_IDENTITY() AS ID")
             postIDReview = self.connection.cursor.fetchone()[0]
-            debug(f"\Review Registered : {postIDReview}")
+            debug(f"\tReview Registered : {postIDReview}")
             return postIDReview
         except pyErr:
                 critical("-"*100)
@@ -106,7 +106,7 @@ class Save:
         count = results[0][0]
         return count
     
-    def saveLinkReviewsCommentsRegistered(self, link) -> bool:
+    def getSaveLinkReviewsCommentsRegistered(self, link) -> bool:
         sql = f"select TOP 1 id from commentRegistered where linkSteamReviewComment ='{link}';"
         results = self.connection.select(sql)
 
@@ -115,9 +115,9 @@ class Save:
         else:
             return False
     
-    def saveLinkReviewsComments(self, link, postIDSteamReview, idSteamGame):
-        if self.saveLinkReviewsCommentsRegistered(link) == False:
-            sql = f"insert into commentRegistered(linkSteamReviewComment, postIDSteamReview, idSteamGame) values ('{link}',{postIDSteamReview}, {idSteamGame});"
+    def saveLinkReviewsComments(self, link, postIDSteamReview, idSteamGame,idSteamPeoplePostReview):
+        if self.getSaveLinkReviewsCommentsRegistered(link) == False:
+            sql = f"insert into commentRegistered(linkSteamReviewComment, postIDSteamReview, idSteamGame, idSteamPeoplePostReview) values ('{link}',{postIDSteamReview}, {idSteamGame}, {idSteamPeoplePostReview});"
             self.connection.insert(sql)
 
             info("Registered steam page comment on database")
