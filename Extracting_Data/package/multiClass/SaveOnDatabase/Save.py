@@ -104,3 +104,10 @@ class Save:
 
         count = results[0][0]
         return count
+    
+    def saveLinkReviewsComments(self, link):
+        sql = f"select TOP 1 id from commentRegistered where link ='{link}';"
+        results = self.connection.select(sql)
+
+        count = results[0]
+        print(count)

@@ -25,3 +25,11 @@ ALTER TABLE reviewAboutComments
 ALTER TABLE reviewAboutComments
 	add constraint fkIDSteam foreign key(idSteam)
 	references pessoaSteam(id)
+
+ALTER TABLE commentRegistered
+	add constraint fkPostIdSteam foreign key(postIDSteam)
+	references reviewCompleta (id)
+
+ALTER TABLE commentRegistered
+	add constraint fkIdSteamComment foreign key(idSteam) 
+	references pessoaSteam(id);	

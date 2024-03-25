@@ -97,3 +97,13 @@ if not exists (select * from information_schema.tables where table_name = 'revie
 			primary key(id)
 		)
 	end;
+
+if not exists(select * from information_schema.tables where table_name = 'commentRegistered')
+	begin
+		create table commentRegistered(
+			id int not null identity(1,1), 
+			link varchar(200) unique not null,
+			postIDSteam int not null,
+			idSteam int not null
+		);
+	end;
