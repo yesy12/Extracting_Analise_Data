@@ -1,6 +1,6 @@
 from pyodbc import Error as pyErr
 from sql.credential import credential
-from package.functions import getRandomNickname
+from package.functions import getRandomNickname, subSpecificParams
 
 from logging import info, debug, critical, error
 
@@ -10,10 +10,13 @@ class Save:
         self.connection = credential()
 
     def saveGameTitle(self, idGame, title, linkGameSteam) -> bool:
-        sql = f"select TOP 1 * from gameCadastrado where id = {idGame};"
+        sql = f"select TOP 1 * from gameCadastrado where id = '{idGame}';"
         results = self.connection.select(sql)
+
         try:
-            if (len(results) > 0) == False:
+            if ( len(results) > 0) == False:
+                title = subSpecificParams("'",'"', title)
+                
                 sql = f""" insert into gameCadastrado (id, plataforma, titulo, link, dataCadastro, dataAlterado) values ({idGame}, 1, '{title}', '{linkGameSteam}', GETDATE(),GETDATE());"""
                 try:
                     self.connection.insert(sql)
