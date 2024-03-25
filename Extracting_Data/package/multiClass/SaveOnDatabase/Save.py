@@ -2,6 +2,8 @@ from pyodbc import Error as pyErr
 from sql.credential import credential
 from package.functions import getRandomNickname
 
+from logging import info, debug, critical, error
+
 class Save:
 
     def __init__(self) -> None:
@@ -15,13 +17,12 @@ class Save:
                 sql = f""" insert into gameCadastrado (id, plataforma, titulo, link, dataCadastro, dataAlterado) values ({idGame}, 1, '{title}', '{linkGameSteam}', GETDATE(),GETDATE());"""
                 try:
                     self.connection.insert(sql)
-                    print(f"Cadastrado: {title}")
+                    debug(f"Registered: {title}")
                 except pyErr:
-                    print(pyErr)
+                    critical(f"Error on Registered title on database: {pyErr}")
         except:
-            print("Erro")          
+            error("Erro")          
              
-
     def saveSteamPeople(self, link) -> int:
         sql = f"select TOP 1 id,relevancia from pessoaSteam where link = '{link}';"
         results = self.connection.select(sql)
@@ -34,14 +35,14 @@ class Save:
                     self.connection.cursor.execute("SELECT SCOPE_IDENTITY() AS ID")
 
                     steamIDUser = self.connection.cursor.fetchone()[0]
-                    print(f"\t\tUsuario cadastrado: {steamIDUser}")
+                    debug(f"\t\tUsuario cadastrado: {steamIDUser}")
                     return steamIDUser
                 
                 except pyErr:
-                    print("-"*100)
-                    print(f"SQL: {sql}")
-                    print(f"Erro em usuario cadastrado: {pyErr}") 
-                    print("-"*100)
+                    critical("-"*100)
+                    critical(f"SQL: {sql}")
+                    critical(f"Error on Registered users: {pyErr}") 
+                    critical("-"*100)
                     return -1
             else:
                 id = results[0][0]
@@ -50,11 +51,11 @@ class Save:
                 sql = f"update pessoaSteam set relevancia = {relevancia} + 1 where link = '{link}';"
                 self.connection.insert(sql)
 
-                print(f"\t\tRelevância alterada de: {relevancia} para: {relevancia+1}")
+                debug(f"\t\tRelevância alterada de: {relevancia} para: {relevancia+1}")
                 return id
             
         except pyErr:
-            print(pyErr)
+            critical(f"Error on Save.SaveSteamPeople: {pyErr}")
             return -1                      
 
     def saveGameInformation(self, player, vote, likes, playerInfo, idGame) -> None:
@@ -78,13 +79,13 @@ class Save:
             self.connection.insert(sql)
             self.connection.cursor.execute("SELECT SCOPE_IDENTITY() AS ID")
             postIDReview = self.connection.cursor.fetchone()[0]
-            print(f"\tPostagem Cadastrada: {postIDReview}")
+            debug(f"\Review Registered : {postIDReview}")
             return postIDReview
         except pyErr:
-                print("-"*100)
-                print(f"SQL: {sql}")
-                print(f"Erro em cadastrado de review: {pyErr}") 
-                print("-"*100)        
+                critical("-"*100)
+                critical(f"SQL: {sql}")
+                critical(f"Error on Review Registered: {pyErr}") 
+                critical("-"*100)        
 
     def saveCommentsAboutReview(self, datePublished, commentText, idPostReview, idSteam) -> None:
         sql = f"""insert into reviewAboutComments(dataPublicada, comments, idPostReview, idSteam, dataCadastro, dataAlterado)
@@ -93,10 +94,10 @@ class Save:
             self.connection.insert(sql)
             self.connection.cursor.execute("SELECT SCOPE_IDENTITY() AS ID")
             comentIDReview = self.connection.cursor.fetchone()[0]
-            print(f"\t\tComentario Cadastrado: {comentIDReview}")
+            debug(f"\t\tComentario Cadastrado: {comentIDReview}")
         except pyErr:
-            print(f"Error: {pyErr}")
-            print("Tabela não cadastrada")
+            critical(f"Error: {pyErr}")
+            critical("Tabela não cadastrada")
 
     def CountReviewsFromIdGame(self, idGame):
         sql = f"select TOP 1 count(id) from reviewCompleta where gameCadastrado = '{idGame}';"
@@ -105,9 +106,18 @@ class Save:
         count = results[0][0]
         return count
     
-    def saveLinkReviewsComments(self, link):
-        sql = f"select TOP 1 id from commentRegistered where link ='{link}';"
+    def saveLinkReviewsCommentsRegistered(self, link) -> bool:
+        sql = f"select TOP 1 id from commentRegistered where linkSteamReviewComment ='{link}';"
         results = self.connection.select(sql)
 
-        count = results[0]
-        print(count)
+        if(len(results) > 0):
+            return True
+        else:
+            return False
+    
+    def saveLinkReviewsComments(self, link, postIDSteamReview, idSteamGame):
+        if self.saveLinkReviewsCommentsRegistered(link) == False:
+            sql = f"insert into commentRegistered(linkSteamReviewComment, postIDSteamReview, idSteamGame) values ('{link}',{postIDSteamReview}, {idSteamGame});"
+            self.connection.insert(sql)
+
+            info("Registered steam page comment on database")

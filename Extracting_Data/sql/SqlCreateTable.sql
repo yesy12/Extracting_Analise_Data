@@ -102,8 +102,8 @@ if not exists(select * from information_schema.tables where table_name = 'commen
 	begin
 		create table commentRegistered(
 			id int not null identity(1,1), 
-			link varchar(200) unique not null,
-			postIDSteam int not null,
-			idSteam int not null
+			linkSteamReviewComment varchar(200) unique not null,
+			postIDSteamReview int not null,
+			idSteamGame int not null
 		);
 	end;

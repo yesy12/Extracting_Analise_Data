@@ -27,9 +27,9 @@ ALTER TABLE reviewAboutComments
 	references pessoaSteam(id)
 
 ALTER TABLE commentRegistered
-	add constraint fkPostIdSteam foreign key(postIDSteam)
+	add constraint fkPostIdSteam foreign key(postIDSteamReview)
 	references reviewCompleta (id)
 
 ALTER TABLE commentRegistered
-	add constraint fkIdSteamComment foreign key(idSteam) 
-	references pessoaSteam(id);	
+	add constraint fkIdSteamComment foreign key(idSteamGame) 
+	references gameCadastrado(id);
