@@ -22,6 +22,8 @@ from package.multiClass.SaveOnDatabase.Save import Save
 import re
 import logging
 
+from functions import saveToHtml
+
 class Review():
 
     def __init__(self, ) -> None:
@@ -85,65 +87,61 @@ class Review():
         self.save.saveGameTitle(self.AppIDGame, title, linkGameSteam)
 
     def setPageRow(self, pageIndex, indexUnique=False) -> None:
+        self.pageIndex = pageIndex
         pageRow = self.driver.find_element(By.ID, f"page{pageIndex}")
         print(f"Page: {pageIndex}")
 
-        self.divCardRows = pageRow.find_elements(By.XPATH,"//div[@class='apphub_CardRow' ]")
+        saveToHtml(pageRow.get_attribute('innerHTML'),"/Extracting_Data/htmls/pageId/", f"page_{pageIndex}.html")
 
-        if(indexUnique == True):
-            self.divCardRow = pageRow.find_element(By.ID, "page_1_row_1_template_twoSmall")
+
+        self.divCardRows = pageRow.find_elements(By.XPATH,"//div[@class='apphub_CardRow' ]")
+        # if(indexUnique == True):
+        #     self.divCardRow = pageRow.find_element(By.ID, "page_1_row_1_template_twoSmall")
    
     def exitOnThisGame(self, quantify):
         return self.save.CountReviewsFromIdGame(self.AppIDGame)  > quantify
 
-    def getUnique(self) -> None:
-        pass
-        # divCardRowReviewUniquePlayer = self.divCardRow.find_element(By.CLASS_NAME, "apphub_Card")
-        # geral = divCardRowReviewUniquePlayer.find_element(By.CLASS_NAME, "apphub_CardContentMain")
-        # appReviews = geral.find_element(By.CLASS_NAME,"apphub_UserReviewCardContent") 
-                            
-        # self.getDescriptionForLikes(appReviews)
-        # self.getDescriptionForVote(appReviews)
-        # self.getDescriptionForRewiew(appReviews)
-
-        # self.getPlayerInfo(divCardRowReviewUniquePlayer)
-        # self.save.saveSteamPeople(self.playerInfo.getLinkPlayerSteam())
-        # self.postIDReview = self.save.saveGameInformation(self.player, self.vote, self.likes, self.playerInfo, self.AppIDGame)
-        # sleep(3)
-
-        # self.getComments()
-
     def getGeral(self) -> None:
-        for divCardRow in self.divCardRows:                
-            divCardRowRewiewUniquePlayers = divCardRow.find_elements(By.CLASS_NAME, "apphub_Card")
-        
-            for divCardRowReviewUniquePlayer in divCardRowRewiewUniquePlayers:
-                self.index+= 1
-                geral = divCardRowReviewUniquePlayer.find_element(By.CLASS_NAME, "apphub_CardContentMain")
-                appReviews = geral.find_element(By.CLASS_NAME,"apphub_UserReviewCardContent") 
-                            
-                self.getDescriptionForLikes(appReviews)
-                self.getDescriptionForVote(appReviews)
-                self.getDescriptionForRewiew(appReviews)
+        for line,divCardRow in enumerate(self.divCardRows):                
+            print(f"\tLinhas: {line}")
+            try:
 
-                self.getPlayerInfo(divCardRowReviewUniquePlayer)
-                self.steamIDUser = self.save.saveSteamPeople(self.playerInfo.getLinkPlayerSteam())
-                self.postIDReview = self.save.saveGameInformation(self.player, self.vote, self.likes, self.playerInfo, self.AppIDGame)
+                divCardRowRewiewUniquePlayers = divCardRow.find_elements(By.CLASS_NAME, "apphub_Card")
 
-                if self.getComments() == True:                    
-                    sleep(3)                
-                    logging.debug("Comment") 
-                    handles = self.driver.window_handles                    
-                    self.driver.switch_to.window(handles[0])
+                for elementId,divCardRowReviewUniquePlayer in enumerate(divCardRowRewiewUniquePlayers):
+                    self.index += 1
+                    # saveToHtml(divCardRowReviewUniquePlayer.get_attribute('innerHTML'),"/Extracting_Data/htmls/divReviewUniquePlayer/", f"divReviewUniquePlayer{self.pageIndex}_{line}_{elementId}.html")
+                    print(f"\t\tElemento: {elementId}: {self.index}")
+                    geral = divCardRowReviewUniquePlayer.find_element(By.CLASS_NAME, "apphub_CardContentMain")
 
+                    appReviews = geral.find_element(By.CLASS_NAME,"apphub_UserReviewCardContent") 
+                                
+                    self.getDescriptionForLikes(appReviews)
+                    self.getDescriptionForVote(appReviews)
+                    self.getDescriptionForRewiew(appReviews)
+
+                    self.getPlayerInfo(divCardRowReviewUniquePlayer)
+                    self.steamIDUser = self.save.saveSteamPeople(self.playerInfo.getLinkPlayerSteam())
+                    self.postIDReview = self.save.saveGameInformation(self.player, self.vote, self.likes, self.playerInfo, self.AppIDGame)
+
+                    # if self.getComments() == True:                    
+                    #     sleep(3)                
+                    #     logging.debug("Comment") 
+                    #     handles = self.driver.window_handles                    
+                    #     self.driver.switch_to.window(handles[0])
+            except:
+                logging.critical("ERROR")
                 
         print("-"*100)
         
     def getScrollHeight(self) -> int:
-        return self.driver.execute_script("return document.body.scrollHeight")
+        try:
+            return self.driver.execute_script("return document.body.scrollHeight")
+        except:
+            return -1
 
     def scroll(self):
-        self.driver.execute_script(f"window.scrollTo(0,{self.getScrollHeight()})")
+        self.driver.execute_script(f"window.scrollTo(0,document.body.scrollHeight)")
         sleep(2)      
 
     def getDescriptionForLikes(self, appReviewsDriver) -> None:
@@ -160,7 +158,7 @@ class Review():
     
     def getPlayerInfo(self, divCardRowRewiewUniquePlayerDriver) -> None:
         appPlayersInfo = divCardRowRewiewUniquePlayerDriver.find_element(By.CLASS_NAME,"apphub_CardContentAuthorBlock")
-        self.linkReviews = divCardRowRewiewUniquePlayerDriver.get_attribute("data-modal-content-url")        
+        self.linkReviews = divCardRowRewiewUniquePlayerDriver.get_attribute("data-modal-content-url")       
         self.playerInfo = PlayerInfo(appPlayersInfo,self.linkReviews, self.driver)
 
     def getComments(self) -> bool:
