@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 import names
 from random import randint
- 
+from os import getcwd
  
 regexDefault = "([A-z]| |á|ú|ç)+"
 tableMonth = ["janeiro","fevereiro", "março", "abril", "maio", "junho","julho","agosto", "setembro", "outubro", "novembro", "dezembro"]
@@ -84,3 +84,8 @@ def getRandomNickname() -> str:
 def subSpecificParams(params, replace, text) -> str:
     result = re.sub(f"{params}", replace, text)
     return result
+
+def saveToHtml(element, path, filename, mode="w"):
+    pathComplete = f"{getcwd()}{path}{filename}"
+    with open(pathComplete, mode, encoding="utf-8") as file:
+        file.write(element)
