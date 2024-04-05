@@ -66,6 +66,7 @@ if not exists (select * from information_schema.tables  where table_name = 'revi
 			descricao text, 
 			horasJogadas decimal(10,2) not null, 
 			dataPublicada date, 
+			horaPublicada time(0) null,
 			recomendado int not null,
 
 			pessoasAcharamUtil int, 
@@ -74,6 +75,7 @@ if not exists (select * from information_schema.tables  where table_name = 'revi
 			
 			quantidadesComentarios int, 
 			quantidadeJogosNaConta int null, 
+			linkSteamReview varchar(500) unique not null,
 
 			idSteam int null, 
 			linguagemPublicacao int null,
@@ -88,6 +90,7 @@ if not exists (select * from information_schema.tables where table_name = 'revie
 		create table reviewAboutComments(
 			id int not null identity(1,1),
 			dataPublicada date not null,
+			horaPublicada time(0) null,
 			comments text not null,
 
 			idPostReview int not null,

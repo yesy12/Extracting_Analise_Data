@@ -70,12 +70,12 @@ class Save:
             result = row
 
         sql = f"""
-            insert into reviewCompleta (descricao, horasJogadas, dataPublicada, recomendado, pessoasAcharamUtil, pessoasAcharamEngracada, pessoasReagiramEmoticon, quantidadesComentarios, quantidadeJogosNaConta, idSteam, gameCadastrado)
+            insert into reviewCompleta (descricao, horasJogadas, dataPublicada, recomendado, pessoasAcharamUtil, pessoasAcharamEngracada, pessoasReagiramEmoticon, quantidadesComentarios, quantidadeJogosNaConta, idSteam, gameCadastrado, linkSteamReview)
 	        values (
                 '{player.getReviewAboutTheGame()}', {vote.getHoursPlayers()}, '{player.getPublishDay()}', 
                 {vote.getRecomend()}, {likes.getLikesUtil()}, {likes.getLikesFunny()}, 
                 {likes.getLikesEmoticon()}, {playerInfo.getQuantifyCommentAboutFromReview()},{playerInfo.getQuantifyGameFromPlayerReview()},
-                {result}, {idGame})
+                {result}, {idGame}, '{playerInfo.linkNew}')
         """
 
         try:
