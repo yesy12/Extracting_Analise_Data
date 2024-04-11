@@ -3,6 +3,8 @@ from datetime import datetime
 import names
 from random import randint
 from os import getcwd
+
+from selenium.webdriver.common.by import By
  
 regexDefault = "([A-z]| |á|ú|ç)+"
 tableMonth = ["janeiro","fevereiro", "março", "abril", "maio", "junho","julho","agosto", "setembro", "outubro", "novembro", "dezembro"]
@@ -89,3 +91,15 @@ def saveToHtml(element, path, filename, mode="w"):
     pathComplete = f"{getcwd()}{path}{filename}"
     with open(pathComplete, mode, encoding="utf-8") as file:
         file.write(element)
+
+def findElement(id):
+    find = By.ID
+
+    if id == 1:
+        find = By.CLASS_NAME
+    elif id == 2:
+        find = By.TAG_NAME
+    elif id == 3:
+        find = By.XPATH
+
+    return find
