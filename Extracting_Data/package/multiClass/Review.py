@@ -1,6 +1,5 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import Select
 from time import sleep
 
 from os import path
@@ -9,17 +8,13 @@ from sys import path as path2
 root_dir = path.dirname(path.abspath(__file__))
 path2.append(path.join(root_dir, ".."))
 
-from package.multiClass.Reviews.PlayerReviewDescription import PlayerReviewDescription
-
-from package.multiClass.Descriptions.Likes import Likes
-from package.multiClass.Descriptions.Vote import Vote
-
-from package.multiClass.PlayerAboutInformation.PlayerInfos import PlayerInfo
-from package.multiClass.PlayerAboutInformation.Comments.Comments import Commnents
 
 from package.multiClass.SaveOnDatabase.Save import Save
 
-import re
+from .driverApp import DriverApp as driverAppFunctions
+from .gameActual import gameActual 
+import package.multiClass.ReviewsCompletes as rc
+
 import logging
 
 from functions import saveToHtml
@@ -31,60 +26,31 @@ class Review():
         self.index = 0
         self.save = Save()
 
+        self.driverApp = driverAppFunctions(self.driver)
+        self.game = gameActual(self.driver)
+
         self.postIDReview = 0
         self.steamIDUser = 0
+        self.AppIDGame = 0
 
     def getLink(self, link) -> None:
         self.driver.get(link)
 
-    def ageCheck(self) -> None:
-        logging.debug("agecheck on the link")
-        link = self.driver.current_url
-        find = re.search(r"agecheck",link)
-
-        if find:
-            self.setMyDateFromGetAllReviews()
-            sleep(0.2)
-            self.accessPage()
-
-    def setMyDateFromGetAllReviews(self):
-        ageDay = Select(self.driver.find_element(By.ID,"ageDay"))
-        ageMonth = Select(self.driver.find_element(By.ID,"ageMonth"))
-        ageYear = Select(self.driver.find_element(By.ID,"ageYear"))
-
-        ageDay.select_by_index(0)
-        ageMonth.select_by_index(0)
-        ageYear.select_by_index(0)
-
-    def accessPage(self):
-        accessPage = self.driver.find_element(By.ID, "view_product_page_btn")
-        accessPage.click()
-
-
     def getAllReviews(self)-> None:
-        while True:
-            lastHeight = self.getScrollHeight()
-            self.scroll()
-            newScrollHeight = self.getScrollHeight()
-            if lastHeight == newScrollHeight:
-                break
+        self.driverApp.scrollInfinite(5)
         
         sleep(2)
         logging.debug("Get all reviews page")
-        allReview = self.driver.find_element(By.CLASS_NAME, "view_all_reviews_btn")
+        allReview = self.driverApp.returnElement(20, 1, "view_all_reviews_btn")
         allReview.click()
-        
+        self.driverApp.verifyContentSexualGame()
 
-    def gameActual(self):
-        div = self.driver.find_element(By.CLASS_NAME, "apphub_OtherSiteInfo")                   
-        appID = div.find_element(By.CLASS_NAME, "btnv6_blue_hoverfade")
+    def getAndSaveGame(self):
+        title,self.AppIDGame, link = self.game.getGame()
+        self.save.saveGameTitle(self.AppIDGame, title, link)
 
-        self.AppIDGame = appID.get_attribute("data-appid") 
-        linkGameSteam = appID.get_attribute("href")
-
-        title = div = self.driver.find_element(By.CLASS_NAME, "apphub_AppName").text
-
-        self.save.saveGameTitle(self.AppIDGame, title, linkGameSteam)
+    def exitOnThisGame(self, quantify):
+        return self.save.CountReviewsFromIdGame(self.AppIDGame)  > quantify
 
     def setPageRow(self, pageIndex, indexUnique=False) -> None:
         self.pageIndex = pageIndex
@@ -93,34 +59,29 @@ class Review():
 
         saveToHtml(pageRow.get_attribute('innerHTML'),"/Extracting_Data/htmls/pageId/", f"page_{pageIndex}.html")
 
-
         self.divCardRows = pageRow.find_elements(By.XPATH,"//div[@class='apphub_CardRow' ]")
-        # if(indexUnique == True):
-        #     self.divCardRow = pageRow.find_element(By.ID, "page_1_row_1_template_twoSmall")
+
    
-    def exitOnThisGame(self, quantify):
-        return self.save.CountReviewsFromIdGame(self.AppIDGame)  > quantify
 
     def getGeral(self) -> None:
         for line,divCardRow in enumerate(self.divCardRows):                
             print(f"\tLinhas: {line}")
             try:
-
                 divCardRowRewiewUniquePlayers = divCardRow.find_elements(By.CLASS_NAME, "apphub_Card")
 
                 for elementId,divCardRowReviewUniquePlayer in enumerate(divCardRowRewiewUniquePlayers):
                     self.index += 1
-                    # saveToHtml(divCardRowReviewUniquePlayer.get_attribute('innerHTML'),"/Extracting_Data/htmls/divReviewUniquePlayer/", f"divReviewUniquePlayer{self.pageIndex}_{line}_{elementId}.html")
+                        
                     print(f"\t\tElemento: {elementId}: {self.index}")
                     geral = divCardRowReviewUniquePlayer.find_element(By.CLASS_NAME, "apphub_CardContentMain")
 
-                    appReviews = geral.find_element(By.CLASS_NAME,"apphub_UserReviewCardContent") 
+                    appReviews = geral.find_element(By.CLASS_NAME,"apphub_UserReviewCardContent")                                 
                                 
-                    self.getDescriptionForLikes(appReviews)
-                    self.getDescriptionForVote(appReviews)
-                    self.getDescriptionForRewiew(appReviews)
+                    self.likes = rc.getDescriptionForLikes(appReviews)
+                    self.vote = rc.getDescriptionForVote(appReviews)
+                    self.player = rc.getDescriptionForRewiew(appReviews)
+                    self.playerInfo = rc.getPlayerInfo(divCardRowReviewUniquePlayer, self.driver)
 
-                    self.getPlayerInfo(divCardRowReviewUniquePlayer)
                     self.steamIDUser = self.save.saveSteamPeople(self.playerInfo.getLinkPlayerSteam())
                     self.postIDReview = self.save.saveGameInformation(self.player, self.vote, self.likes, self.playerInfo, self.AppIDGame)
 
@@ -134,53 +95,30 @@ class Review():
                 
         print("-"*100)
         
-    def getScrollHeight(self) -> int:
-        try:
-            return self.driver.execute_script("return document.body.scrollHeight")
-        except:
-            return -1
 
-    def scroll(self):
-        self.driver.execute_script(f"window.scrollTo(0,document.body.scrollHeight)")
-        sleep(2)      
 
-    def getDescriptionForLikes(self, appReviewsDriver) -> None:
-        found = appReviewsDriver.find_element(By.CLASS_NAME, "found_helpful").text
-        self.likes = Likes(found)        
 
-    def getDescriptionForVote(self, appReviewsDriver) -> None:
-        vote = appReviewsDriver.find_element(By.CLASS_NAME, "vote_header")
-        self.vote = Vote(vote)
 
-    def getDescriptionForRewiew(self, appReviewsDriver) -> None:
-        cardContextReview = appReviewsDriver.find_element(By.CLASS_NAME, "apphub_CardTextContent")
-        self.player =  PlayerReviewDescription(cardContextReview)
-    
-    def getPlayerInfo(self, divCardRowRewiewUniquePlayerDriver) -> None:
-        appPlayersInfo = divCardRowRewiewUniquePlayerDriver.find_element(By.CLASS_NAME,"apphub_CardContentAuthorBlock")
-        self.linkReviews = divCardRowRewiewUniquePlayerDriver.get_attribute("data-modal-content-url")       
-        self.playerInfo = PlayerInfo(appPlayersInfo,self.linkReviews, self.driver)
+    # def getComments(self) -> bool:
+    #     getCommentsBool = self.save.getSaveLinkReviewsCommentsRegistered(self.playerInfo.linkNew)
 
-    def getComments(self) -> bool:
-        getCommentsBool = self.save.getSaveLinkReviewsCommentsRegistered(self.playerInfo.linkNew)
+    #     if( getCommentsBool == False):
+    #         comentarios = self.playerInfo.clickQuantifyComment()
 
-        if( getCommentsBool == False):
-            comentarios = self.playerInfo.clickQuantifyComment()
+    #         if(len(comentarios) > 0):
+    #             self.save.saveLinkReviewsComments(self.playerInfo.linkNew, self.postIDReview, self.AppIDGame, self.steamIDUser)        
 
-            if(len(comentarios) > 0):
-                self.save.saveLinkReviewsComments(self.playerInfo.linkNew, self.postIDReview, self.AppIDGame, self.steamIDUser)        
+    #             for comentario in comentarios:
+    #                 comment_ = Commnents()
 
-                for comentario in comentarios:
-                    comment_ = Commnents()
+    #                 comentario[1] = comment_.formaterDate(comentario[1])
+    #                 comentario[2] = comment_.formaterComment(comentario[2])
 
-                    comentario[1] = comment_.formaterDate(comentario[1])
-                    comentario[2] = comment_.formaterComment(comentario[2])
-
-                    self.steamIDUser = self.save.saveSteamPeople(comentario[0])
-                    if self.steamIDUser != -1 and self.postIDReview != -1:
-                        self.save.saveCommentsAboutReview(comentario[1], comentario[2], self.postIDReview, self.steamIDUser)
-                return True
-        else:
-            logging.info("Exists comments on database")
-        return False
+    #                 self.steamIDUser = self.save.saveSteamPeople(comentario[0])
+    #                 if self.steamIDUser != -1 and self.postIDReview != -1:
+    #                     self.save.saveCommentsAboutReview(comentario[1], comentario[2], self.postIDReview, self.steamIDUser)
+    #             return True
+    #     else:
+    #         logging.info("Exists comments on database")
+    #     return False
               
