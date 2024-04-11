@@ -2,7 +2,7 @@ import pyodbc
 from platform import node
 from dotenv import load_dotenv
 from os import getcwd, environ
-
+from logging import critical
 load_dotenv()  
 
 class credential:
@@ -27,7 +27,10 @@ class credential:
             self.cursor.execute(sql)
             self.conn.commit()
         except pyodbc.DatabaseError as error:
-            print(error)
+            critical("*"*100)
+            critical(error)
+            self.conn.rollback()
+        except pyodbc.IntegrityError as error:
             self.conn.rollback()
 
     def select(self, sql):

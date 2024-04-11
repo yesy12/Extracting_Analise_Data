@@ -1,4 +1,4 @@
-from pyodbc import Error as pyErr
+from pyodbc import Error as pyErr, IntegrityError
 from sql.credential import credential
 from package.functions import getRandomNickname, subSpecificParams
 
@@ -41,12 +41,19 @@ class Save:
                     debug(f"\t\tUsuario cadastrado: {steamIDUser}")
                     return steamIDUser
                 
+                except IntegrityError as ite:
+                    print("h")
+                    error("*"*100)
+                    error(f"Erro: {ite}")
+                
                 except pyErr:
                     critical("-"*100)
                     critical(f"SQL: {sql}")
                     critical(f"Error on Registered users: {pyErr}") 
                     critical("-"*100)
                     return -1
+                
+
             else:
                 id = results[0][0]
                 relevancia = results[0][1]
@@ -77,18 +84,22 @@ class Save:
                 {likes.getLikesEmoticon()}, {playerInfo.getQuantifyCommentAboutFromReview()},{playerInfo.getQuantifyGameFromPlayerReview()},
                 {result}, {idGame}, '{playerInfo.linkNew}')
         """
-
         try:
             self.connection.insert(sql)
             self.connection.cursor.execute("SELECT SCOPE_IDENTITY() AS ID")
             postIDReview = self.connection.cursor.fetchone()[0]
             debug(f"\tReview Registered : {postIDReview}")
-            return postIDReview
+            return postIDReview        
+        
+        except IntegrityError as ite:
+            error("*"*100)
+            error(f"Erro: {ite}")
+            
         except pyErr:
-                critical("-"*100)
-                critical(f"SQL: {sql}")
-                critical(f"Error on Review Registered: {pyErr}") 
-                critical("-"*100)        
+            critical("-"*100)
+            critical(f"SQL: {sql}")
+            critical(f"Error on Review Registered: {pyErr}") 
+            critical("-"*100)        
 
     def saveCommentsAboutReview(self, datePublished, commentText, idPostReview, idSteam) -> None:
         sql = f"""insert into reviewAboutComments(dataPublicada, comments, idPostReview, idSteam, dataCadastro, dataAlterado)
