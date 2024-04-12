@@ -3,9 +3,10 @@
 if not exists (select * from information_schema.tables  where table_name = 'linguagens')
 	begin
 		create table linguagens(
-			id int not null identity(1,1),
-			lingua varchar(50),
-			sigla varchar(5) UNIQUE ,
+			id int identity(1,1) not null ,
+			lingua varchar(50) not null,
+			sigla varchar(10) not null,
+			linkReference varchar(50),
 			dataCadastro date not null,
 			dataAlterado date
 			primary key(id)
