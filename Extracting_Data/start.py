@@ -1,10 +1,13 @@
 
 from time import sleep
-
+from dotenv import load_dotenv
 from package.multiClass.Review import Review
-from os import getcwd
+from os import getcwd, environ
 import logging
+load_dotenv()    
 
+quantifyGames = int(environ["quantifyReviewFOrGames"])
+languagesId = environ["languagesId"].split(",")
 
 newReview = Review()
 logging.basicConfig(
@@ -19,32 +22,36 @@ diretorioAtual = f"{getcwd()}/Extracting_Data/games.txt"
 
 with open(diretorioAtual, "r", encoding="utf-8") as lines:
     for line in lines.readlines():    
-        logging.debug(f"Jogo: {line}")   
-
+        # logging.debug(f"Jogo: {line}")   
         newReview.getLink(line)
         newReview.driverApp.ageCheck()
         newReview.getAllReviews()
+        
+        for id in languagesId:
+            newReview.defineLanguage(id)
 
-        sleep(2)
-        newReview.getAndSaveGame()
+            sleep(3)
+            newReview.getAndSaveGame()
 
-        for i in range(1,10000):
-            sleep(1)
-            newReview.setPageRow(i)
-            result = newReview.exitOnThisGame(100000)
+            i=0
+            while True:
+                sleep(2)
+                i+= 1
+                newReview.setPageRow(i)
+                result = newReview.exitOnThisGame(quantifyGames)
 
-            if result == True:
-                logging.debug("Proximo")
-                break   
+                if result == True:
+                    logging.debug("Proximo")
+                    break   
 
-            newReview.getGeral()
+                newReview.getGeral()
+                    
+                sleep(5)
                 
-            sleep(5)
-            
-            lastHeight = newReview.driverApp.getScrollHeight()
-            newReview.driverApp.scroll(2)
-            newScrollHeight = newReview.driverApp.getScrollHeight()
+                lastHeight = newReview.driverApp.getScrollHeight()
+                newReview.driverApp.scroll(2)
+                newScrollHeight = newReview.driverApp.getScrollHeight()
 
-            if lastHeight == newScrollHeight or newScrollHeight == -1:
-                break
+                if lastHeight == newScrollHeight or newScrollHeight == -1:
+                    break
 

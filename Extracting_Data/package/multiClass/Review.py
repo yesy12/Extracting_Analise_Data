@@ -32,9 +32,14 @@ class Review():
         self.postIDReview = 0
         self.steamIDUser = 0
         self.AppIDGame = 0
+        self.LanguageId = 0 
+        self.linkReference = ""
 
     def getLink(self, link) -> None:
         self.driver.get(link)
+
+    def getLinkLanguage(self, params):
+        self.driver.get( self.driver.current_url + f"&filterLanguage={params}")
 
     def getAllReviews(self)-> None:
         self.driverApp.scrollInfinite(5)
@@ -61,7 +66,11 @@ class Review():
 
         self.divCardRows = pageRow.find_elements(By.XPATH,"//div[@class='apphub_CardRow' ]")
 
-   
+    def defineLanguage(self, idLanguage):
+        self.LanguageId = idLanguage
+        self.linkReference = self.save.getLinkRefenceLanguage(self.LanguageId)
+        self.getLinkLanguage(self.linkReference)
+       
 
     def getGeral(self) -> None:
         for line,divCardRow in enumerate(self.divCardRows):                
@@ -83,7 +92,7 @@ class Review():
                     self.playerInfo = rc.getPlayerInfo(divCardRowReviewUniquePlayer, self.driver)
 
                     self.steamIDUser = self.save.saveSteamPeople(self.playerInfo.getLinkPlayerSteam())
-                    self.postIDReview = self.save.saveGameInformation(self.player, self.vote, self.likes, self.playerInfo, self.AppIDGame)
+                    self.postIDReview = self.save.saveGameInformation(self.player, self.vote, self.likes, self.playerInfo, self.AppIDGame, self.LanguageId)
 
                     # if self.getComments() == True:                    
                     #     sleep(3)                

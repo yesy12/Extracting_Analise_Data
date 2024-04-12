@@ -68,7 +68,7 @@ class Save:
             critical(f"Error on Save.SaveSteamPeople: {pyErr}")
             return -1                      
 
-    def saveGameInformation(self, player, vote, likes, playerInfo, idGame) -> None:
+    def saveGameInformation(self, player, vote, likes, playerInfo, idGame, idLanguage) -> None:
         sql = f"select TOP 1 id from pessoaSteam where link = '{playerInfo.getLinkPlayerSteam()}';"    
         results = self.connection.select(sql)
         result = 0
@@ -77,12 +77,12 @@ class Save:
             result = row
 
         sql = f"""
-            insert into reviewCompleta (descricao, horasJogadas, dataPublicada, recomendado, pessoasAcharamUtil, pessoasAcharamEngracada, pessoasReagiramEmoticon, quantidadesComentarios, quantidadeJogosNaConta, idSteam, gameCadastrado, linkSteamReview)
+            insert into reviewCompleta (descricao, horasJogadas, dataPublicada, recomendado, pessoasAcharamUtil, pessoasAcharamEngracada, pessoasReagiramEmoticon, quantidadesComentarios, quantidadeJogosNaConta, idSteam, gameCadastrado, linkSteamReview, linguagemPublicacao)
 	        values (
                 '{player.getReviewAboutTheGame()}', {vote.getHoursPlayers()}, '{player.getPublishDay()}', 
                 {vote.getRecomend()}, {likes.getLikesUtil()}, {likes.getLikesFunny()}, 
                 {likes.getLikesEmoticon()}, {playerInfo.getQuantifyCommentAboutFromReview()},{playerInfo.getQuantifyGameFromPlayerReview()},
-                {result}, {idGame}, '{playerInfo.linkNew}')
+                {result}, {idGame}, '{playerInfo.linkNew}', {idLanguage})
         """
         try:
             self.connection.insert(sql)
@@ -135,3 +135,13 @@ class Save:
             self.connection.insert(sql)
 
             info("Registered steam page comment on database")
+
+    def getLinkRefenceLanguage(self, idLanguage):
+        sql = f'select TOP 1 linkReference from linguagens where id = {idLanguage};'
+
+        result = self.connection.select(sql)
+
+        if(len(result) > 0):        
+            return result[0][0]
+        else:
+            return "default"
