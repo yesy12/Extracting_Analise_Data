@@ -38,6 +38,7 @@ class credential:
             self.cursor.execute(sql)
             return self.cursor.fetchall()  
         except:
+            critical("ERROR _ SELECT ")
             self.conn.rollback()
     
     def openFile(self, path):

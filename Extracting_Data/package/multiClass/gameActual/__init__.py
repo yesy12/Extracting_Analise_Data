@@ -6,8 +6,10 @@ class gameActual:
         self.driver = driverApp
 
     def getGame(self):
+        
         div = self.driver.find_element(By.CLASS_NAME, "apphub_OtherSiteInfo")                   
         appID = div.find_element(By.CLASS_NAME, "btnv6_blue_hoverfade")
+
         try:
             AppIDGame = int(appID.get_attribute("data-appid"))            
         except:

@@ -14,7 +14,7 @@ class Save:
         results = self.connection.select(sql)
 
         try:
-            if ( len(results) > 0) == False:
+            if (len(results) > 0) == False:
                 title = subSpecificParams("'",'"', title)
                 
                 sql = f""" insert into gameCadastrado (id, plataforma, titulo, link, dataCadastro, dataAlterado) values ({idGame}, 1, '{title}', '{linkGameSteam}', GETDATE(),GETDATE());"""
@@ -24,7 +24,7 @@ class Save:
                 except pyErr:
                     critical(f"Error on Registered title on database: {pyErr}")
         except:
-            error("Erro")          
+            error("Error, Save Game title")          
              
     def saveSteamPeople(self, link) -> int:
         sql = f"select TOP 1 id,relevancia from pessoaSteam where link = '{link}';"
@@ -76,8 +76,7 @@ class Save:
         for row in results[0]:
             result = row
 
-        sql = f"""
-            insert into reviewCompleta (descricao, horasJogadas, dataPublicada, recomendado, pessoasAcharamUtil, pessoasAcharamEngracada, pessoasReagiramEmoticon, quantidadesComentarios, quantidadeJogosNaConta, idSteam, gameCadastrado, linkSteamReview, linguagemPublicacao)
+        sql = f"""insert into reviewCompleta (descricao, horasJogadas, dataPublicada, recomendado, pessoasAcharamUtil, pessoasAcharamEngracada, pessoasReagiramEmoticon, quantidadesComentarios, quantidadeJogosNaConta, idSteam, gameCadastrado, linkSteamReview, linguagemPublicacao)
 	        values (
                 '{player.getReviewAboutTheGame()}', {vote.getHoursPlayers()}, '{player.getPublishDay()}', 
                 {vote.getRecomend()}, {likes.getLikesUtil()}, {likes.getLikesFunny()}, 
@@ -90,16 +89,18 @@ class Save:
             postIDReview = self.connection.cursor.fetchone()[0]
             debug(f"\tReview Registered : {postIDReview}")
             return postIDReview        
-        
+            
         except IntegrityError as ite:
             error("*"*100)
             error(f"Erro: {ite}")
-            
+                
         except pyErr:
             critical("-"*100)
             critical(f"SQL: {sql}")
             critical(f"Error on Review Registered: {pyErr}") 
-            critical("-"*100)        
+            critical("-"*100)   
+
+             
 
     def saveCommentsAboutReview(self, datePublished, commentText, idPostReview, idSteam) -> None:
         sql = f"""insert into reviewAboutComments(dataPublicada, comments, idPostReview, idSteam, dataCadastro, dataAlterado)
@@ -113,12 +114,14 @@ class Save:
             critical(f"Error: {pyErr}")
             critical("Tabela não cadastrada")
 
-    def CountReviewsFromIdGame(self, idGame):
-        sql = f"select TOP 1 count(id) from reviewCompleta where gameCadastrado = '{idGame}';"
-        results = self.connection.select(sql)
-
-        count = results[0][0]
-        return count
+    def CountReviewsFromIdGame(self, idGame, idLanguage):
+        try:
+            sql = f"select TOP 1 count(id) from reviewCompleta where gameCadastrado = '{idGame}' and linguagemPublicacao = {idLanguage};"
+            results = self.connection.select(sql)
+            count = results[0][0]
+            return count
+        except:
+            return -1
     
     def getSaveLinkReviewsCommentsRegistered(self, link) -> bool:
         sql = f"select TOP 1 id from commentRegistered where linkSteamReviewComment ='{link}';"
@@ -138,10 +141,18 @@ class Save:
 
     def getLinkRefenceLanguage(self, idLanguage):
         sql = f'select TOP 1 linkReference from linguagens where id = {idLanguage};'
-
         result = self.connection.select(sql)
 
         if(len(result) > 0):        
             return result[0][0]
         else:
             return "default"
+        
+    def getReviewForLink(self, link) -> bool:
+        sql = f"select top 1 id from reviewCompleta where linkSteamReview = '{link}';"
+        result = self.connection.select(sql)
+        if(len(result) > 0):
+            return True
+        else:
+            return False
+    

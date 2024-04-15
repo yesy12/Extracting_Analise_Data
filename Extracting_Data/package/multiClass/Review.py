@@ -39,6 +39,7 @@ class Review():
         self.driver.get(link)
 
     def getLinkLanguage(self, params):
+        print(f"Idioma Params: "+params)
         self.driver.get( self.driver.current_url + f"&filterLanguage={params}")
 
     def getAllReviews(self)-> None:
@@ -55,7 +56,10 @@ class Review():
         self.save.saveGameTitle(self.AppIDGame, title, link)
 
     def exitOnThisGame(self, quantify):
-        return self.save.CountReviewsFromIdGame(self.AppIDGame)  > quantify
+        try:
+            return self.save.CountReviewsFromIdGame(self.AppIDGame, self.LanguageId)  > quantify
+        except:
+            return False
 
     def setPageRow(self, pageIndex, indexUnique=False) -> None:
         self.pageIndex = pageIndex
@@ -73,15 +77,11 @@ class Review():
        
 
     def getGeral(self) -> None:
-        for line,divCardRow in enumerate(self.divCardRows):                
-            print(f"\tLinhas: {line}")
-            try:
+        for divCardRow in self.divCardRows:                
                 divCardRowRewiewUniquePlayers = divCardRow.find_elements(By.CLASS_NAME, "apphub_Card")
 
-                for elementId,divCardRowReviewUniquePlayer in enumerate(divCardRowRewiewUniquePlayers):
-                    self.index += 1
-                        
-                    print(f"\t\tElemento: {elementId}: {self.index}")
+                for divCardRowReviewUniquePlayer in divCardRowRewiewUniquePlayers:
+                    self.index += 1                        
                     geral = divCardRowReviewUniquePlayer.find_element(By.CLASS_NAME, "apphub_CardContentMain")
 
                     appReviews = geral.find_element(By.CLASS_NAME,"apphub_UserReviewCardContent")                                 
@@ -91,16 +91,15 @@ class Review():
                     self.player = rc.getDescriptionForRewiew(appReviews)
                     self.playerInfo = rc.getPlayerInfo(divCardRowReviewUniquePlayer, self.driver)
 
-                    self.steamIDUser = self.save.saveSteamPeople(self.playerInfo.getLinkPlayerSteam())
-                    self.postIDReview = self.save.saveGameInformation(self.player, self.vote, self.likes, self.playerInfo, self.AppIDGame, self.LanguageId)
-
+                    if self.save.getReviewForLink(self.playerInfo.linkNew) == False:
+                        self.steamIDUser = self.save.saveSteamPeople(self.playerInfo.getLinkPlayerSteam())
+                        self.postIDReview = self.save.saveGameInformation(self.player, self.vote, self.likes, self.playerInfo, self.AppIDGame, self.LanguageId)
+                    
                     # if self.getComments() == True:                    
                     #     sleep(3)                
                     #     logging.debug("Comment") 
                     #     handles = self.driver.window_handles                    
                     #     self.driver.switch_to.window(handles[0])
-            except:
-                logging.critical("ERROR")
                 
         print("-"*100)
         
