@@ -14,7 +14,8 @@ logging.basicConfig(
     filemode="w",
     filename="Extracting_Data/logs/log.log",
     encoding="utf-8",
-    level=logging.INFO
+    level=logging.INFO,
+    format='%(pathname)s\n%(levelname)s Create: %(asctime)s Line: %(lineno)d %(funcName)s Level: %(levelno)s Log: %(message)s\n'
 )
 
 
@@ -26,12 +27,13 @@ with open(diretorioAtual, "r", encoding="utf-8") as lines:
         newReview.getLink(line)
         newReview.driverApp.ageCheck()
         newReview.getAllReviews()
+        sleep(2)
+        newReview.getAndSaveGame()
         
         for id in languagesId:
             newReview.defineLanguage(id)
 
             sleep(3)
-            newReview.getAndSaveGame()
 
             i=0
             while True:
